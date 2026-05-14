@@ -188,6 +188,8 @@ public:
         return SearchResult{ip, jp, row, col};
     }
 
+
+
     // rook_search(max_iter): pivoting using lazy residual
     std::optional<SearchResult> rook_search(Index max_iter = 5) const {
         auto R = residual_lazy();
@@ -197,10 +199,10 @@ public:
         if (ip < 0 || jp < 0) return std::nullopt;
 
         for (Index it = 0; it < max_iter; ++it) {
-
-            // Step 1: row maximization
-            Index j_new = 0;
+            // Maximize over current row ip
+            Index j_new = jp;
             RealScalar best_row = RealScalar(0);
+
             for (Index j = 0; j < m_; ++j) {
                 const RealScalar v = Eigen::numext::abs(R(ip, j));
                 if (v > best_row) {
@@ -208,11 +210,13 @@ public:
                     j_new = j;
                 }
             }
+
             if (!(best_row > RealScalar(0))) return std::nullopt;
 
-            // Step 2: column maximization (use j_new!)
-            Index i_new = 0;
+            // Maximize over selected column j_new
+            Index i_new = ip;
             RealScalar best_col = RealScalar(0);
+
             for (Index i = 0; i < n_; ++i) {
                 const RealScalar v = Eigen::numext::abs(R(i, j_new));
                 if (v > best_col) {
@@ -220,22 +224,31 @@ public:
                     i_new = i;
                 }
             }
+
             if (!(best_col > RealScalar(0))) return std::nullopt;
 
-            // Step 3: convergence check (BEFORE updating)
-            if (i_new == ip && j_new == jp) {
-                Vec row(m_), col(n_);
-                for (Index j = 0; j < m_; ++j) row(j) = R(ip, j);
-                for (Index i = 0; i < n_; ++i) col(i) = R(i, jp);
-                return SearchResult{ip, jp, row, col};
-            }
+            const Index ip_old = ip;
+            const Index jp_old = jp;
 
-            // Step 4: update iterate
             ip = i_new;
             jp = j_new;
+
+            // Rook condition: current row/column maximizers agree
+            if (ip == ip_old && jp == jp_old) {
+                break;
+            }
         }
 
-        return std::nullopt;
+        // Return the current candidate, even if max_iter was reached.
+        Vec row(m_), col(n_);
+        for (Index j = 0; j < m_; ++j) row(j) = R(ip, j);
+        for (Index i = 0; i < n_; ++i) col(i) = R(i, jp);
+
+        if (!(Eigen::numext::abs(row(jp)) > RealScalar(0))) {
+            return std::nullopt;
+        }
+
+        return SearchResult{ip, jp, row, col};
     }
 
     // enlarge: assuming M_big's top-left is old M.
