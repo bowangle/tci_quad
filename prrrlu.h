@@ -109,16 +109,17 @@ public:
     }
 
     // addPivot(ip, jp, row, col) where row is residual row at ip, col residual col at jp
+    // addPivot(ip, jp, row, col) where row is residual row at ip, col residual col at jp
     Scalar addPivot(Index ip, Index jp, const Vec& row, const Vec& col) {
-        pivot_.push_back({ip, jp});
-        pivot_rows_.push_back(ip);
-        pivot_cols_.push_back(jp);
-
         const Scalar d_new = row(jp);
         if (Eigen::numext::abs(d_new) == RealScalar(0)) {
             // this pivot is useless
             return Scalar(0);
         }
+
+        pivot_.push_back({ip, jp});
+        pivot_rows_.push_back(ip);
+        pivot_cols_.push_back(jp);
 
         const Vec u_new = row / d_new; // length m
         const Vec l_new = col / d_new; // length n
@@ -145,8 +146,7 @@ public:
         if (!res.has_value()) return false;
 
         const auto& out = *res;
-        addPivot(out.ip, out.jp, out.row, out.col);
-        return true;
+        return Eigen::numext::abs(addPivot(out.ip, out.jp, out.row, out.col)) > RealScalar(0);
     }
 
     // full_search(): compute dense residual, find argmax |residual|, return pivot info.
