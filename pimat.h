@@ -5,7 +5,7 @@
 #ifndef PIMAT_H
 #define PIMAT_H
 
-#include <eigen3/Eigen/Dense>
+#include <Eigen/Dense>
 #include <vector>
 #include <functional>
 #include <memory>

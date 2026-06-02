@@ -5,6 +5,7 @@
 #include <complex>
 
 #include <boost/multiprecision/float128.hpp>
+#include <boost/multiprecision/complex128.hpp>
 #include <boost/multiprecision/cpp_dec_float.hpp>
 
 #include "tensorcross.h"
@@ -56,6 +57,31 @@ float128 f_quad(const MultiIndex& mi)
          / (float128(1) + float128("0.05") * s3);
 }
 
+using cquad = std::complex<float128>;
+using complex128 = boost::multiprecision::complex128;
+// ----- quad complex version -----
+cquad f_complex128(const MultiIndex& mi)
+{
+    const int N = static_cast<int>(mi.data.size());
+
+    cquad s1 = cquad(0.0), s2 = cquad(0.0), s3 = cquad(0.0);
+
+    for (int k = 0; k < N; ++k) {
+        cquad xk(mi.data[k]);
+
+        s1 += xk;
+        s2 += cquad(k + 1) * xk;
+        s3 += xk * xk;
+    }
+
+    using std::exp;
+    using std::cos;
+
+    return exp(cquad(-0.1) * s1)
+         * cos(cquad(0.3) * s2)
+         / (cquad(1) + cquad(0.05) * s3);
+}
+
 // ============================================================
 //  Helper: run TCI and report errors
 // ============================================================
@@ -104,6 +130,7 @@ void run_demo(const std::string& label,
         std::cout << "  idx=";
         for (int v : idx) std::cout << v << " ";
         std::cout << "\n";
+        std::cout << "    chi = " << tt.max_bond_dimension()   << "\n";
         std::cout << "    exact = " << exact   << "\n";
         std::cout << "    TT    = " << tt_val  << "\n";
         std::cout << "    |err| = " << std::setprecision(6)
@@ -122,7 +149,7 @@ int main()
     // ----------------------------------------------------------
     const int N      = 8;   // number of tensor modes
     const int d      = 6;   // physical dimension (indices 0..5)
-    const int sweeps = 40;  // TCI sweeps
+    const int sweeps = 60;  // TCI sweeps
 
     // A few test points to check pointwise accuracy
     std::vector<std::vector<int>> test_pts = {
@@ -148,6 +175,16 @@ int main()
     run_demo<float128>(
         "QUAD PRECISION (float128)",
         f_quad,
+        N, d, sweeps,
+        test_pts
+    );
+
+    // ----------------------------------------------------------
+    // cQuad precision run
+    // ----------------------------------------------------------
+    run_demo<cquad>(
+        "Quad complex PRECISION (complex128)",
+        f_complex128,
         N, d, sweeps,
         test_pts
     );

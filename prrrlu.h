@@ -5,7 +5,7 @@
 #ifndef PRRRLU_H
 #define PRRRLU_H
 
-#include <eigen3/Eigen/Dense>
+#include <Eigen/Dense>
 #include <vector>
 #include <utility>
 #include <optional>

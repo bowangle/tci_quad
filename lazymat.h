@@ -1,10 +1,9 @@
-
 // SPDX-License-Identifier: MIT
 // Copyright (c) 2025 matthieu.jeannin
 
 #pragma once
 
-#include <eigen3/Eigen/Dense>
+#include <Eigen/Dense>
 #include <functional>
 #include <unordered_map>
 #include <stdexcept>

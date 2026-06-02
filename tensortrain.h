@@ -7,7 +7,7 @@
 
 #include <vector>
 #include <stdexcept>
-#include <eigen3/Eigen/Dense>
+#include <Eigen/Dense>
 
 // Reuse your TTCore alias
 template <typename Scalar>
@@ -82,6 +82,19 @@ public:
         return acc(0, 0);
     }
 
+    int max_bond_dimension() const
+    {
+        int max_r = 0;
+
+        for (int k = 0; k < N_; ++k) {
+            const auto& G0 = cores_[k][0];  // representative slice
+
+            max_r = std::max(max_r, (int)G0.rows());
+            max_r = std::max(max_r, (int)G0.cols());
+        }
+
+        return max_r;
+    }
 
     // ---------------- evaluation ----------------
     // inds.size() == N
