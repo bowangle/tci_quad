@@ -119,6 +119,8 @@ void save_TTErrorOnGrid(const TTErrorOnGrid<Scalar>& e,
     if (!file)
         throw std::runtime_error("Cannot open file");
 
+    file << std::fixed << std::setprecision(34);
+
     using Complex = std::complex<Scalar>;
 
     auto write_vec = [&](const char* name, const std::vector<Scalar>& v)
