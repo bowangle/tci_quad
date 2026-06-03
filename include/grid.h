@@ -38,7 +38,7 @@ public:
         dx = (b_ - a_) / Scalar(N);
     }
 
-    std::vector<int> coord_to_id(Scalar x) const {
+    MultiIndex coord_to_id(Scalar x) const {
         using boost::multiprecision::llround;
         using std::llround;
 
@@ -57,7 +57,7 @@ public:
         return _bits(k);
     }
 
-    Scalar id_to_coord(const std::vector<int>& bits) const {
+    Scalar id_to_coord(const MultiIndex& bits) const {
         Sint k = 0;
         for (int i = 0; i < nBits; ++i)
             k |= (Sint(bits[i]) << i);
@@ -66,8 +66,8 @@ public:
     }
 
 private:
-    std::vector<int> _bits(Sint k) const {
-        std::vector<int> bits(nBits);
+    MultiIndex _bits(Sint k) const {
+        MultiIndex bits(nBits);
 
         for (int i = 0; i < nBits; ++i)
             bits[i] = (k >> i) & 1;
