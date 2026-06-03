@@ -2,6 +2,7 @@
 #include <cmath>
 #include <vector>
 #include <stdexcept>
+#include "mindex.h"
 
 #include "int128.h"
 #include <boost/multiprecision/float128.hpp>
