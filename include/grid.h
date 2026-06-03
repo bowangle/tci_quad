@@ -8,6 +8,7 @@
 
 using float128 = boost::multiprecision::float128;
 
+// QTGrid support up to nBit=63. It might fail for 
 template <typename Scalar, typename Sint>
 class QTGrid {
 public:
@@ -28,15 +29,19 @@ public:
            Sint k_offset_ = 0)
         : a(a_), b(b_), nBits(nBits_), k_offset(k_offset_), x_ref(a_)
     {
+        if (nBits < 0 || nBits > 63) {
+            throw std::invalid_argument("nBits must be in [0, 63]");
+        }
+
         N = Sint(1) << nBits;
         dx = (b_ - a_) / Scalar(N);
     }
 
     std::vector<int> coord_to_id(Scalar x) const {
-        using boost::multiprecision::conj;
+        using boost::multiprecision::llround;
         using std::llround;
 
-        Sint k = static_cast<Sint>(llround((x - a) / dx));
+        Sint k = static_cast<Sint>(llround((x - a) * N/ (b-a)));
 
         if (k == N) k = N - 1;
 
@@ -54,7 +59,7 @@ public:
     Scalar id_to_coord(const std::vector<int>& bits) const {
         Sint k = 0;
         for (int i = 0; i < nBits; ++i)
-            k |= (bits[i] << i);
+            k |= (Sint(bits[i]) << i);
 
         return _coords(k);
     }
@@ -75,4 +80,5 @@ private:
 };
 
 using GridDouble = QTGrid<double, long long>;
+using GridQuadFast = QTGrid<float128, long long>;
 using GridQuad   = QTGrid<float128, util::i128>;

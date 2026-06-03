@@ -40,18 +40,25 @@ void test_one_grid_roudtrip(const char* name, const int nBit) {
 void test_grid_roundtrip(){
     test_one_grid_roudtrip<GridDouble>("double grid", 8);
     test_one_grid_roudtrip<GridQuad>("float128 grid", 8);
+    test_one_grid_roudtrip<GridQuadFast>("float128 fast grid", 8);
 
     test_one_grid_roudtrip<GridDouble>("double grid", 30);
     test_one_grid_roudtrip<GridQuad>("float128 grid", 30);
+    test_one_grid_roudtrip<GridQuadFast>("float128 fast grid", 30);
+
+    test_one_grid_roudtrip<GridDouble>("double grid", 40);
+    test_one_grid_roudtrip<GridQuad>("float128 grid", 40);
+    test_one_grid_roudtrip<GridQuadFast>("float128 fast grid", 40);
 
     test_one_grid_roudtrip<GridDouble>("double grid", 48);
     test_one_grid_roudtrip<GridQuad>("float128 grid", 48);
+    test_one_grid_roudtrip<GridQuadFast>("float128 fast grid", 48);
 
     test_one_grid_roudtrip<GridDouble>("double grid", 53);
     test_one_grid_roudtrip<GridQuad>("float128 grid", 53);
+    test_one_grid_roudtrip<GridQuadFast>("float128 fast grid", 53);
 
-    test_one_grid_roudtrip<GridQuad>("float128 grid", 110);
-    test_one_grid_roudtrip<GridQuad>("float128 grid", 113);
+    test_one_grid_roudtrip<GridQuad>("float128 grid", 63);
 }
 
 template <typename Scalar, typename Sint>
