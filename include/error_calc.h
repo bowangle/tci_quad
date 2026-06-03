@@ -3,6 +3,8 @@
 #include <iostream>
 #include <complex>
 #include <functional>
+#include <fstream>
+#include <string>
 
 #include "grid.h"
 #include "mindex.h"
@@ -50,7 +52,6 @@ void compute_stats(
 
     for (const auto& x : v)
     {
-        
         Real ax = abs(x);
 
         sum += ax;
@@ -74,12 +75,18 @@ void compute_stats(
 // output type of error calculation
 template <typename Scalar>
 struct TTErrorOnGrid {
+    using Complex = std::complex<Scalar>;
+
     std::vector<Scalar> real_abs;
     std::vector<Scalar> real_rel;
     std::vector<Scalar> imag_abs;
     std::vector<Scalar> imag_rel;
     std::vector<Scalar> abs_abs;
     std::vector<Scalar> abs_rel;
+
+    std::vector<Scalar> l_point;
+    std::vector<Complex> l_ref;
+    std::vector<Complex> l_tt;
 
     Scalar real_abs_mean, real_abs_min, real_abs_max;
     Scalar real_rel_mean, real_rel_min, real_rel_max;
@@ -102,6 +109,37 @@ struct TTErrorOnGrid {
         compute_stats(abs_rel, abs_rel_mean, abs_rel_min, abs_rel_max);
     }
 };
+
+template <typename Scalar>
+void save_TTErrorOnGrid(const TTErrorOnGrid<Scalar>& e,
+                        const std::string& filename)
+{
+    std::ofstream file(filename);
+
+    if (!file)
+        throw std::runtime_error("Cannot open file");
+
+    using Complex = std::complex<Scalar>;
+
+    auto write_vec = [&](const char* name, const std::vector<Scalar>& v)
+    {
+        file << name << " " << v.size() << "\n";
+        for (const auto& x : v) file << x << " ";
+        file << "\n\n";
+    };
+
+    auto write_cvec = [&](const char* name, const std::vector<Complex>& v)
+    {
+        file << name << " " << v.size() << "\n";
+        for (const auto& x : v)
+            file << x.real() << " " << x.imag() << " ";
+        file << "\n\n";
+    };
+
+    write_vec("l_point",  e.l_point);
+    write_cvec("l_ref", e.l_ref);
+    write_cvec("l_tt",  e.l_tt);
+}
 
 template <typename Scalar>
 std::ostream& operator<<(std::ostream& os, const TTErrorOnGrid<Scalar>& e)
@@ -152,6 +190,9 @@ TTErrorOnGrid<Scalar> error_TT_on_grid_point(
     out.abs_rel.resize(nb_point);
 
     std::vector<Scalar> l_point = linspace(grid.a, grid.b, nb_point);
+    std::vector<Complex> l_ref_i(nb_point);
+    std::vector<Complex> l_res_tt(nb_point);
+
 
     for (int i = 0; i < nb_point; i++)
     {
@@ -159,7 +200,10 @@ TTErrorOnGrid<Scalar> error_TT_on_grid_point(
         const MultiIndex id = grid.coord_to_id(x);
 
         Complex ref_i = gf_id(id);
+        l_ref_i[i] = ref_i;
+
         Complex res_tt = tt.eval(id.data);
+        l_res_tt[i] = res_tt;
 
         Complex diff = ref_i - res_tt;
 
@@ -185,6 +229,9 @@ TTErrorOnGrid<Scalar> error_TT_on_grid_point(
             out.abs_rel[i]  = 0;
         }
     }
+    out.l_point = l_point;
+    out.l_ref = l_ref_i;
+    out.l_tt = l_res_tt;
     out.compute_summary();
     return out;
 }

@@ -56,7 +56,7 @@ class TCI_Runner{
         };
     }
 
-    void fit(bool verbose = true){
+    void fit(bool verbose = true, bool do_save=false, const std::string& filename=""){
         if (verbose){
             std::cout << "\n========================================\n";
             std::cout << "  N=" << grid.nBits << "  d=" << 2
@@ -87,6 +87,13 @@ class TCI_Runner{
             error_TT_on_grid_point(tt_temp, function_id, grid, 1000);
         std::cout << error << "\n";
 
+        std::vector<Scalar> pivot_error = tci.pivotErrors();
+
+        if (do_save){
+            save_TTErrorOnGrid(error, filename);
+        }
+
+        // save the tt
     }
 
 
