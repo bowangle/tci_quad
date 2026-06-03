@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) 2025 matthieu.jeannin
-
+#pragma once
 
 #ifndef TCI_H
 #define TCI_H

@@ -46,8 +46,6 @@ public:
 
         if (k == N) k = N - 1;
 
-        std::cout << k << "\n" << N << "\n";
-
         if (!(k >= 0 && k <= N - 1))
         {
             std::cout << k << "\n" << N << "\n";

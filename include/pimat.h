@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) 2025 matthieu.jeannin
-
+#pragma once
 
 #ifndef PIMAT_H
 #define PIMAT_H
