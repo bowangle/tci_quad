@@ -7,6 +7,7 @@
 #include "grid.h"
 #include "mindex.h"
 #include "tensortrain.h"
+#include <boost/multiprecision/float128.hpp>
 
 // Linespace
 template <typename Scalar>
@@ -36,22 +37,38 @@ void compute_stats(
     Scalar& min,
     Scalar& max)
 {
-    Scalar sum = 0;
-    min = std::numeric_limits<Scalar>::infinity();
-    max = -std::numeric_limits<Scalar>::infinity();
+    using Real = Scalar;
+    using std::abs;
+    using boost::multiprecision::abs;
+
+    Real sum = Real(0);
+
+    Real min_abs = std::numeric_limits<Real>::infinity();
+    Real max_abs = Real(0);
 
     int count = 0;
 
-    for (auto x : v)
+    for (const auto& x : v)
     {
-        sum += x;
-        min = std::min(min, x);
-        max = std::max(max, x);
+        
+        Real ax = abs(x);
+
+        sum += ax;
+
+        if (ax < min_abs) min_abs = ax;
+        if (ax > max_abs) max_abs = ax;
+
         count++;
     }
 
-    mean = (count > 0) ? sum / Scalar(count)
-                       : std::numeric_limits<Scalar>::quiet_NaN();
+    Real mean_abs = (count > 0)
+        ? sum / Real(count)
+        : std::numeric_limits<Real>::quiet_NaN();
+
+    // cast back to Scalar (important if Scalar is complex)
+    mean = Scalar(mean_abs);
+    min  = Scalar(min_abs);
+    max  = Scalar(max_abs);
 }
 
 // output type of error calculation
