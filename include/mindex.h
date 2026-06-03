@@ -14,6 +14,9 @@ struct MultiIndex {
     std::vector<int> data;
 
     MultiIndex() = default;
+    explicit MultiIndex(size_t nBits)
+        : data(nBits, 0) {}
+
     explicit MultiIndex(std::vector<int> v) : data(std::move(v)) {}
     MultiIndex(std::initializer_list<int> v) : data(v) {}
 
