@@ -12,6 +12,11 @@ class TCI_param{
 
     int nBit;
     int nb_iter;
+
+    TCI_param(int nBit_, int nb_iter_)
+    :   nBit(nBit_),
+        nb_iter(nb_iter_)
+    {}
 };
 
 // f_type can be a scalar type or a complex type:
