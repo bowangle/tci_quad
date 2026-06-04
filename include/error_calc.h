@@ -134,7 +134,7 @@ void save_TTErrorOnGrid(const TTErrorOnGrid<Scalar>& e,
     {
         file << name << " " << v.size() << "\n";
         for (const auto& x : v)
-            file << x.real() << " " << x.imag() << " ";
+            file << "(" << x.real() << "," << x.imag() << ") ";
         file << "\n\n";
     };
 
