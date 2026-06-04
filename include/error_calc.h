@@ -119,7 +119,7 @@ void save_TTErrorOnGrid(const TTErrorOnGrid<Scalar>& e,
     if (!file)
         throw std::runtime_error("Cannot open file");
 
-    file << std::fixed << std::setprecision(34);
+    file << std::setprecision(std::numeric_limits<Scalar>::max_digits10);
 
     using Complex = std::complex<Scalar>;
 
