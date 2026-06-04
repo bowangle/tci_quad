@@ -56,14 +56,15 @@ class TCI_Runner{
         };
     }
 
-    void fit(bool verbose = true, bool do_save=false, const std::string& filename=""){
+    void fit(const Scalar E_init, bool verbose = true, bool do_save=false, const std::string& filename=""){
         if (verbose){
             std::cout << "\n========================================\n";
             std::cout << "  N=" << grid.nBits << "  d=" << 2
                     << "  sweeps=" << tci_param.nb_iter << "\n";
             std::cout << "========================================\n";
         }
-        MultiIndex pivot0(std::vector<int>(grid.nBits, 0));
+        MultiIndex pivot0 = grid.coord_to_id(E_init);
+
         TCI<Complex> tci(function_id, l_d, pivot0);
         
         for (int it = 0; it < tci_param.nb_iter; ++it) {
