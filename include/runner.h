@@ -56,7 +56,7 @@ class TCI_Runner{
         };
     }
 
-    void fit(const Scalar E_init, const std::vector<Scalar> other_E, bool verbose = true, bool do_save=false, const std::string& filename=""){
+    void fit(const Scalar E_init, const std::vector<Scalar> other_E, bool verbose = true, bool do_save=false, const std::string& filename="", int nb_point_res=1000){
         if (verbose){
             std::cout << "\n========================================\n";
             std::cout << "  N=" << grid.nBits << "  d=" << 2
@@ -92,7 +92,7 @@ class TCI_Runner{
         auto tt_temp = tci.get_TensorTrain();
         std::cout << "Max bond dim:" <<tt_temp.max_bond_dimension() << "\n";
         TTErrorOnGrid<Scalar> error = 
-            error_TT_on_grid_point(tt_temp, function_id, grid, 1000);
+            error_TT_on_grid_point(tt_temp, function_id, grid, nb_point_res);
         std::cout << error << "\n";
 
         std::vector<Scalar> pivot_error = tci.pivotErrors();
