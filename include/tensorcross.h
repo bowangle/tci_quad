@@ -105,28 +105,22 @@ public:
     void addpivot_all_bound(const MultiIndex& pivot1)
     {
         if (pivot1.data.size() != static_cast<std::size_t>(N_))
-            throw std::invalid_argument("addpivot_all_bound: wrong dimension");
+            throw std::invalid_argument("wrong dimension");
 
         for (Index site = 0; site < N_ - 1; ++site)
         {
-            if (site < 0 || site + 1 >= N_) continue;
-
-            MultiIndex ipiv(
-                std::vector<int>(
-                    pivot1.data.begin(),
-                    pivot1.data.begin() + site
-                )
+            std::vector<int> left(
+                pivot1.data.begin(),
+                pivot1.data.begin() + site + 1
             );
 
-            MultiIndex jpiv(
-                std::vector<int>(
-                    pivot1.data.begin() + site + 2,
-                    pivot1.data.end()
-                )
+            std::vector<int> right(
+                pivot1.data.begin() + site + 1,
+                pivot1.data.end()
             );
 
-            l_pi_[site].add_I(ipiv);
-            l_pi_[site].add_J(jpiv);
+            l_pi_[site].add_I(MultiIndex(left));
+            l_pi_[site].add_J(MultiIndex(right));
         }
     }
 
