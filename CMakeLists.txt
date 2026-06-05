@@ -30,7 +30,11 @@ add_executable(TCIcpp
 add_executable(TestGrid
     test/test_grid.cpp
 )
+add_executable(TestTCI
+    test/test_tci.cpp
+)
 
 target_link_libraries(TestGrid PRIVATE quadmath)
+target_link_libraries(TestTCI PRIVATE quadmath)
 
 target_link_libraries(TCIcpp PRIVATE quadmath tci)

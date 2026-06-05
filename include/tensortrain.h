@@ -9,6 +9,8 @@
 #include <stdexcept>
 #include <Eigen/Dense>
 
+#include "tt_sav_load.h"
+
 // Reuse your TTCore alias
 template <typename Scalar>
 using TTCore = std::vector<
@@ -113,6 +115,43 @@ public:
         // scalar result (1×1)
         return core(0, 0);
     }
+
+    std::vector<Cube<Scalar>>
+    convert_to_cubes(){
+        std::vector<Cube<Scalar>> result;
+        result.reserve(cores_.size());
+
+        for (const auto& core : cores_) {
+            if (core.empty())
+                throw std::invalid_argument("Empty TT core");
+
+            size_t r1 = core[0].rows();
+            size_t r2 = core[0].cols();
+            size_t n  = core.size();
+
+            Cube<Scalar> cube;
+            cube.n_rows = r1;
+            cube.n_cols = r2;
+            cube.n_slices = n;
+            cube.data.resize(r1 * r2 * n);
+
+            for (size_t p = 0; p < n; ++p) {
+                const auto& M = core[p];
+
+                if (M.rows() != (int)r1 || M.cols() != (int)r2)
+                    throw std::invalid_argument("Inconsistent matrix shape in TT core");
+
+                for (size_t i = 0; i < r1; ++i)
+                    for (size_t j = 0; j < r2; ++j)
+                        cube(i, j, p) = M(i, j);
+            }
+
+            result.push_back(std::move(cube));
+        }
+
+        return result;
+    }
+
 
 private:
     // return G^{(k)}[:,p,:]

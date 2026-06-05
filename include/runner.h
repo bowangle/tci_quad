@@ -1,10 +1,12 @@
-#pragma
+#pragma once
 
 #include "grid.h"
 #include "tensortrain.h"
 #include "tensorcross.h"
 #include "mindex.h"
-#include "error_calc.h"
+#include "output_tci.h"
+
+#include "tt_sav_load.h"
 
 
 class TCI_param{
@@ -56,7 +58,14 @@ class TCI_Runner{
         };
     }
 
-    void fit(const Scalar E_init, const std::vector<Scalar> other_E, bool verbose = true, bool do_save=false, const std::string& filename="", int nb_point_res=1000){
+    void fit(
+        const Scalar E_init,
+        const std::vector<Scalar> other_E,
+        bool verbose = true,
+        bool do_save=false,
+        const std::string& file_prefix="",
+        int nb_point_res=1000
+    ){
         if (verbose){
             std::cout << "\n========================================\n";
             std::cout << "  N=" << grid.nBits << "  d=" << 2
@@ -76,6 +85,7 @@ class TCI_Runner{
 
         for (int it = 0; it < tci_param.nb_iter; ++it) {
             tci.iterate();
+
             std::cout << "  sweep " << std::setw(3) << (it + 1)
                   << "  |pivot error| = "
                   << std::setprecision(6) << std::scientific
@@ -89,7 +99,11 @@ class TCI_Runner{
                 std::cout << error << "\n";
             }
         }
-        auto tt_temp = tci.get_TensorTrain();
+        TensorTrain<Complex> tt_temp = tci.get_TensorTrain();
+        std::vector<Cube<Complex>> cube_cores = tt_temp.convert_to_cubes();
+
+        save_vec_cube(cube_cores, file_prefix + ".tt");
+
         std::cout << "Max bond dim:" <<tt_temp.max_bond_dimension() << "\n";
         TTErrorOnGrid<Scalar> error = 
             error_TT_on_grid_point(tt_temp, function_id, grid, nb_point_res);
@@ -98,7 +112,7 @@ class TCI_Runner{
         std::vector<Scalar> pivot_error = tci.pivotErrors();
 
         if (do_save){
-            save_TTErrorOnGrid(error, filename);
+            save_TTErrorOnGrid(error, file_prefix + "_error.dat");
         }
 
         // save the tt
