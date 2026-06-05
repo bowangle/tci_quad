@@ -102,38 +102,6 @@ public:
             l_pi_[static_cast<std::size_t>(site - 1)].add_J(jpiv);
     }
 
-    void addpivot_all_bound(const MultiIndex& p)
-    {
-        if (p.data.size() != static_cast<std::size_t>(N_))
-            throw std::invalid_argument("wrong dimension");
-
-        for (Index site = 0; site < N_ - 1; ++site)
-        {
-            std::vector<int> left(
-                p.data.begin(),
-                p.data.begin() + site + 1
-            );
-
-            std::vector<int> right(
-                p.data.begin() + site + 1,
-                p.data.end()
-            );
-
-            MultiIndex ipiv(left);
-            MultiIndex jpiv(right);
-
-            // IMPORTANT: do NOT treat all pivots equally
-            l_pi_[site].add_I(ipiv);
-            l_pi_[site].add_J(jpiv);
-
-            // optional but often REQUIRED for consistency:
-            if (site > 0)
-                l_pi_[site - 1].add_J(jpiv);
-
-            if (site < N_ - 2)
-                l_pi_[site + 1].add_I(ipiv);
-        }
-    }
 
     // --------------------------------------------------
     // full sweep

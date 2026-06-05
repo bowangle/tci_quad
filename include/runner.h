@@ -71,7 +71,7 @@ class TCI_Runner{
 
         for (int i=0; i<nb_additional_pivot; i++){
             MultiIndex pivot_temp = grid.coord_to_id(E_init);
-            tci.addpivot_all_bound(pivot_temp);
+            //tci.addpivot_all_bound(pivot_temp);
         }
 
         for (int it = 0; it < tci_param.nb_iter; ++it) {
