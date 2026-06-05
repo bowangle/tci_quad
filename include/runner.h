@@ -56,7 +56,7 @@ class TCI_Runner{
         };
     }
 
-    void fit(const Scalar E_init, bool verbose = true, bool do_save=false, const std::string& filename=""){
+    void fit(const Scalar E_init, const std::vector<Scalar> other_E, bool verbose = true, bool do_save=false, const std::string& filename=""){
         if (verbose){
             std::cout << "\n========================================\n";
             std::cout << "  N=" << grid.nBits << "  d=" << 2
@@ -67,6 +67,13 @@ class TCI_Runner{
 
         TCI<Complex> tci(function_id, l_d, pivot0);
         
+        int nb_additional_pivot = other_E.size();
+
+        for (int i=0; i<nb_additional_pivot; i++){
+            MultiIndex pivot_temp = grid.coord_to_id(E_init);
+            tci.addpivot_all_bound(pivot_temp);
+        }
+
         for (int it = 0; it < tci_param.nb_iter; ++it) {
             tci.iterate();
             std::cout << "  sweep " << std::setw(3) << (it + 1)

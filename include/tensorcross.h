@@ -102,6 +102,34 @@ public:
             l_pi_[static_cast<std::size_t>(site - 1)].add_J(jpiv);
     }
 
+    void addpivot_all_bound(const MultiIndex& pivot1)
+    {
+        if (pivot1.data.size() != static_cast<std::size_t>(N_))
+            throw std::invalid_argument("addpivot_all_bound: wrong dimension");
+
+        for (Index site = 0; site < N_ - 1; ++site)
+        {
+            if (site < 0 || site + 1 >= N_) continue;
+
+            MultiIndex ipiv(
+                std::vector<int>(
+                    pivot1.data.begin(),
+                    pivot1.data.begin() + site
+                )
+            );
+
+            MultiIndex jpiv(
+                std::vector<int>(
+                    pivot1.data.begin() + site + 2,
+                    pivot1.data.end()
+                )
+            );
+
+            l_pi_[site].add_I(ipiv);
+            l_pi_[site].add_J(jpiv);
+        }
+    }
+
     // --------------------------------------------------
     // full sweep
     // --------------------------------------------------
