@@ -85,18 +85,12 @@ class TCI_Runner{
 
         for (int it = 0; it < tci_param.nb_iter; ++it) {
             tci.iterate();
-
-            std::cout << "  sweep " << std::setw(3) << (it + 1)
-                  << "  |pivot error| = "
-                  << std::setprecision(6) << std::scientific
-                  << static_cast<double>(tci.last_pivot_error())
-                  << "\n";
-            if (it%10==0){
-                auto tt_temp = tci.get_TensorTrain();
-                std::cout << "Max bond dim:" <<tt_temp.max_bond_dimension() << "\n";
-                TTErrorOnGrid<Scalar> error = 
-                    error_TT_on_grid_point(tt_temp, function_id, grid, 1000);
-                std::cout << error << "\n";
+            if (verbose){
+                std::cout << "  sweep " << std::setw(3) << (it + 1)
+                    << "  |pivot error| = "
+                    << std::setprecision(6) << std::scientific
+                    << static_cast<double>(tci.last_pivot_error())
+                    << "\n";
             }
         }
         TensorTrain<Complex> tt_temp = tci.get_TensorTrain();
@@ -104,11 +98,16 @@ class TCI_Runner{
 
         save_vec_cube(cube_cores, file_prefix + ".tt");
 
-        std::cout << "Max bond dim:" <<tt_temp.max_bond_dimension() << "\n";
+        if (verbose){
+            std::cout << "Max bond dim:" <<tt_temp.max_bond_dimension() << "\n";
+        }
+        
         TTErrorOnGrid<Scalar> error = 
             error_TT_on_grid_point(tt_temp, function_id, grid, nb_point_res);
-        std::cout << error << "\n";
-
+        
+        if (verbose){
+            std::cout << error << "\n";
+        }
         std::vector<Scalar> pivot_error = tci.pivotErrors();
 
         if (do_save){
