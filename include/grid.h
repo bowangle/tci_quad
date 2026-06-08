@@ -2,7 +2,14 @@
 #include <cmath>
 #include <vector>
 #include <stdexcept>
+#include <fstream>
+#include <sstream>
+#include <iomanip>
+
+#include <nlohmann/json.hpp>
+
 #include "mindex.h"
+using json = nlohmann::json;
 
 #include "int128.h"
 #include <boost/multiprecision/float128.hpp>
@@ -38,6 +45,12 @@ public:
         dx = (b_ - a_) / Scalar(N);
     }
 
+    QTGrid(const std::string& filename)
+    {
+        auto [a_, b_, nBits_] = parse_json(filename);
+        *this = QTGrid(a_, b_, nBits_);
+    }
+
     MultiIndex coord_to_id(Scalar x) const {
         using boost::multiprecision::llround;
         using std::llround;
@@ -63,7 +76,69 @@ public:
         return _coords(k);
     }
 
+    void save_json(const std::string& base) const
+    {
+        json j;
+        json j_2;
+        std::string suffix;
+        std::string suffix_2;
+
+        j["a"] = static_cast<double>(a);
+        j["b"] = static_cast<double>(b);
+        suffix = "_grid.json";
+        j["nBits"] = nBits;
+        
+        std::ostringstream oss_a;
+        oss_a << std::setprecision(std::numeric_limits<Scalar>::digits10 + 5) << a;
+        j_2["a"] = oss_a.str();
+
+        std::ostringstream oss_b;
+        oss_b << std::setprecision(std::numeric_limits<Scalar>::digits10 + 5) << b;
+        j_2["b"] = oss_b.str();
+        suffix_2 = "_grid_E.json";
+        j_2["nBits"] = nBits;
+
+        std::ofstream file(base + suffix);
+        if (!file.is_open())
+            throw std::runtime_error("Cannot open file");
+        std::ofstream file_2(base + suffix_2);
+        if (!file_2.is_open())
+            throw std::runtime_error("Cannot open file_2");
+
+        file << j.dump(4);
+        file_2 << j_2.dump(4);
+    }
+
 private:
+
+    static std::tuple<Scalar, Scalar, int> parse_json(const std::string& filename)
+    {
+        json j;
+
+        std::ifstream file(filename);
+        if (!file.is_open())
+            throw std::runtime_error("Cannot open file");
+
+        file >> j;
+
+        int nBits = j.at("nBits").get<int>();
+
+        Scalar a, b;
+
+        if (j["a"].is_string())
+        {
+            a = Scalar(j.at("a").get<std::string>());
+            b = Scalar(j.at("b").get<std::string>());
+        }
+        else
+        {
+            a = Scalar(j.at("a").get<double>());
+            b = Scalar(j.at("b").get<double>());
+        }
+
+        return {a, b, nBits};
+    }
+
     MultiIndex _bits(Sint k) const {
         MultiIndex bits(nBits);
 

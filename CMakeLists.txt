@@ -9,14 +9,21 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 # ============================================================
 # Include directory (for all targets)
 # ============================================================
-include_directories(${CMAKE_SOURCE_DIR}/include)
-include_directories(${CMAKE_SOURCE_DIR}/extern/eigen)
+set(PROJECT_INCLUDE_DIR ${CMAKE_SOURCE_DIR}/include)
+set(EIGEN_INCLUDE_DIR ${CMAKE_SOURCE_DIR}/extern/eigen)
+set(JSON_INCLUDE_DIR ${CMAKE_SOURCE_DIR}/extern/nlohmann_json)
 
 # ============================================================
 # 1. Shared library (float128 instantiations)
 # ============================================================
 add_library(tci SHARED
     src/tci_quad_instantiations_float128.cpp
+)
+
+target_include_directories(tci PUBLIC
+    ${PROJECT_INCLUDE_DIR}
+    ${EIGEN_INCLUDE_DIR}
+    ${JSON_INCLUDE_DIR}
 )
 
 target_link_libraries(tci PRIVATE quadmath)
@@ -32,6 +39,24 @@ add_executable(TestGrid
 )
 add_executable(TestTCI
     test/test_tci.cpp
+)
+
+target_include_directories(TCIcpp PRIVATE
+    ${PROJECT_INCLUDE_DIR}
+    ${EIGEN_INCLUDE_DIR}
+    ${JSON_INCLUDE_DIR}
+)
+
+target_include_directories(TestGrid PRIVATE
+    ${PROJECT_INCLUDE_DIR}
+    ${EIGEN_INCLUDE_DIR}
+    ${JSON_INCLUDE_DIR}
+)
+
+target_include_directories(TestTCI PRIVATE
+    ${PROJECT_INCLUDE_DIR}
+    ${EIGEN_INCLUDE_DIR}
+    ${JSON_INCLUDE_DIR}
 )
 
 target_link_libraries(TestGrid PRIVATE quadmath)

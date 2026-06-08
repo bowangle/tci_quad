@@ -4,3 +4,4 @@ build/*
 extern/eigen/
 
 *.dat
+*.json

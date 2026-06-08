@@ -70,12 +70,60 @@ void testgrid(){
     QTGrid<Scalar, Sint> grid (a_1, b_1, nBit_1);
 }
 
+template <typename Scalar, typename Sint>
+void test_save_load_roundtrip()
+{
+    Scalar a_1 = Scalar(-5.0);
+    Scalar b_1 = Scalar(10.0);
+    Sint nBit_1 = Sint(15);
+
+    QTGrid<Scalar, Sint> grid(a_1, b_1, nBit_1);
+
+    // ---------------- SAVE ----------------
+    std::string filename = "grid_test";
+    grid.save_json(filename);
+
+    // ---------------- LOAD ----------------
+    QTGrid<Scalar, Sint> grid2(filename + "_grid_E.json");
+
+    // ---------------- CHECKS ----------------
+
+    auto almost_equal = [](Scalar x, Scalar y) {
+        using std::abs;
+        using boost::multiprecision::abs;
+        return abs(x - y) < Scalar(1e-12);
+    };
+
+    std::cout << "a: " << grid.a << " vs " << grid2.a << "\n";
+    std::cout << "b: " << grid.b << " vs " << grid2.b << "\n";
+    std::cout << "nBits: " << grid.nBits << " vs " << grid2.nBits << "\n";
+    std::cout << "k_offset: " << grid.k_offset << " vs " << grid2.k_offset << "\n";
+    std::cout << "x_ref: " << grid.x_ref << " vs " << grid2.x_ref << "\n";
+
+    assert(almost_equal(grid.a, grid2.a));
+    assert(almost_equal(grid.b, grid2.b));
+    assert(grid.nBits == grid2.nBits);
+    assert(grid.k_offset == grid2.k_offset);
+    assert(almost_equal(grid.x_ref, grid2.x_ref));
+
+    // derived consistency
+    assert(grid2.N == (Sint(1) << grid2.nBits));
+
+    Scalar dx1 = (grid.b - grid.a) / Scalar(grid.N);
+    Scalar dx2 = (grid2.b - grid2.a) / Scalar(grid2.N);
+
+    assert(almost_equal(dx1, dx2));
+
+    std::cout << "QTGrid roundtrip test PASSED\n";
+}
 
 int main() {
     
     
     testgrid<float128, util::i128>();
     testgrid<double, long long>();
+
+    test_save_load_roundtrip<float128, util::i128>();
 
     test_grid_roundtrip();
 }
