@@ -63,7 +63,7 @@ def load_dat(filename):
 import matplotlib.pyplot as plt
 from mpmath import mp
 
-def plot_tt_comparison(data, use_mpmath=True):
+def plot_tt_comparison(data, filename: str=""):
     """
     data: dict with keys:
         - l_point
@@ -131,7 +131,12 @@ def plot_tt_comparison(data, use_mpmath=True):
 
 
     plt.tight_layout()
-    plt.show()
+
+    if filename is not "":
+        plt.savefig(filename +"plt.png")
+        plt.savefig(filename +"plt.pdf")
+    else:
+        plt.show()
 
 a = load_dat("error.dat")
 
