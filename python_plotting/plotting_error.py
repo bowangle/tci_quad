@@ -132,7 +132,7 @@ def plot_tt_comparison(data, filename: str=""):
 
     plt.tight_layout()
 
-    if filename is not "":
+    if filename != "":
         plt.savefig(filename +"plt.png")
         plt.savefig(filename +"plt.pdf")
     else:
