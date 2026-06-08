@@ -110,11 +110,11 @@ class TCI_Runner{
         }
         std::vector<Scalar> pivot_error = tci.pivotErrors();
 
+        // save the tt and the grid
         if (do_save){
             save_TTErrorOnGrid(error, file_prefix + "_error.dat");
+            grid.save_json(file_prefix);
         }
-
-        // save the tt
     }
 
 
