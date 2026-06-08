@@ -12,6 +12,7 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 set(PROJECT_INCLUDE_DIR ${CMAKE_SOURCE_DIR}/include)
 set(EIGEN_INCLUDE_DIR ${CMAKE_SOURCE_DIR}/extern/eigen)
 set(JSON_INCLUDE_DIR ${CMAKE_SOURCE_DIR}/extern/nlohmann_json)
+set(spdlog_INCLUDE_DIR ${CMAKE_SOURCE_DIR}/extern/spdlog/include)
 
 # ============================================================
 # 1. Shared library (float128 instantiations)
@@ -24,6 +25,7 @@ target_include_directories(tci PUBLIC
     ${PROJECT_INCLUDE_DIR}
     ${EIGEN_INCLUDE_DIR}
     ${JSON_INCLUDE_DIR}
+    ${spdlog_INCLUDE_DIR}
 )
 
 target_link_libraries(tci PRIVATE quadmath)
@@ -45,18 +47,21 @@ target_include_directories(TCIcpp PRIVATE
     ${PROJECT_INCLUDE_DIR}
     ${EIGEN_INCLUDE_DIR}
     ${JSON_INCLUDE_DIR}
+    ${spdlog_INCLUDE_DIR}
 )
 
 target_include_directories(TestGrid PRIVATE
     ${PROJECT_INCLUDE_DIR}
     ${EIGEN_INCLUDE_DIR}
     ${JSON_INCLUDE_DIR}
+    ${spdlog_INCLUDE_DIR}
 )
 
 target_include_directories(TestTCI PRIVATE
     ${PROJECT_INCLUDE_DIR}
     ${EIGEN_INCLUDE_DIR}
     ${JSON_INCLUDE_DIR}
+    ${spdlog_INCLUDE_DIR}
 )
 
 target_link_libraries(TestGrid PRIVATE quadmath)

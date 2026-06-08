@@ -7,6 +7,8 @@
 #include <boost/multiprecision/float128.hpp>
 using float128 = boost::multiprecision::float128;
 
+#include <spdlog/sinks/basic_file_sink.h>
+#include <spdlog/spdlog.h>
 
 template <typename Scalar>
 std::function<std::complex<Scalar>(Scalar)> make_function_sin()
@@ -34,7 +36,10 @@ void TCI_sin(int nBit, int n_iter, bool do_save=false, const std::string& filena
     TCI_param tci_param = TCI_param(grid.nBits, n_iter);
 
     std::function<std::complex<Scalar>(Scalar)> f_sin = make_function_sin<Scalar>();
-    TCI_Runner<Scalar, long long> tci_runner(grid, tci_param, f_sin);
+
+    auto logger = spdlog::basic_logger_mt("test_file_logger", "test_logs.txt");
+
+    TCI_Runner<Scalar, long long> tci_runner(grid, tci_param, f_sin, logger);
 
     std::vector<Scalar> v = {Scalar("2.05"), Scalar("2.3")};
 

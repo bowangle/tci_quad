@@ -3,6 +3,8 @@
 build/*
 extern/eigen/
 extern/nlohmann_json/
+extern/spdlog/
 
 *.dat
 *.json
+*.txt

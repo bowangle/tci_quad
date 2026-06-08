@@ -8,6 +8,8 @@
 
 #include "tt_sav_load.h"
 
+#include <spdlog/spdlog.h>
+
 
 class TCI_param{
     public:
@@ -33,29 +35,51 @@ class TCI_Runner{
     std::function<Complex(Scalar)> function_x;  // original function
     std::function<Complex(MultiIndex)> function_id; // function on grid
     const std::vector<int> l_d;
+    int counter = 0 ;
+    std::shared_ptr<spdlog::logger> const logger;
 
     
     TCI_Runner(
         QTGrid<Scalar, Sint> grid_,
         TCI_param tci_param_,
-        std::function<Complex(Scalar)> function_x_
+        std::function<Complex(Scalar)> function_x_,
+        std::shared_ptr<spdlog::logger> logger_ = nullptr
     )
     : 
         grid(grid_),
         tci_param(tci_param_),
         function_x(function_x_),
-        function_id(func_to_grid(function_x_, grid_)),
-        l_d(std::vector<int>(grid_.nBits, 2))
+        function_id(func_to_grid(function_x_, grid_, logger_)),
+        l_d(std::vector<int>(grid_.nBits, 2)),
+        logger(logger_),
+        counter(0)
     {}
 
     std::function<Complex(MultiIndex)>
     func_to_grid(
         std::function<Complex(Scalar)> f,
-        const QTGrid<Scalar, Sint>& qt_grid)
+        const QTGrid<Scalar, Sint>& qt_grid,
+        std::shared_ptr<spdlog::logger> logger_ = nullptr
+    )
     {
-        return [&qt_grid, f](const MultiIndex& id) -> Complex {
-            return f(qt_grid.id_to_coord(id));
-        };
+        if (logger_){
+                return [this, &qt_grid, f](const MultiIndex& id) -> Complex {
+                    counter++;
+                    return f(qt_grid.id_to_coord(id));
+                };
+            }
+        else{
+            return [&qt_grid, f](const MultiIndex& id) -> Complex {
+                    return f(qt_grid.id_to_coord(id));
+                };
+        }
+    }
+
+    template <typename T>
+    std::string to_string_stream(const T& v) {
+        std::ostringstream oss;
+        oss << v;
+        return oss.str();
     }
 
     void fit(
@@ -66,12 +90,41 @@ class TCI_Runner{
         const std::string& file_prefix="",
         int nb_point_res=1000
     ){
-        if (verbose){
-            std::cout << "\n========================================\n";
-            std::cout << "  N=" << grid.nBits << "  d=" << 2
-                    << "  sweeps=" << tci_param.nb_iter << "\n";
-            std::cout << "========================================\n";
+        auto log = [&](const std::string& msg) {
+            if (logger) {
+                logger->info(msg);
+            } 
+            if (verbose) {
+                std::cout << msg << "\n";
+            }
+        };
+
+        log("========== FIT PARAMETERS ==========");
+
+        log("E_init = " + to_string_stream(E_init));
+
+        std::string other_E_str = "[";
+        for (size_t i = 0; i < other_E.size(); ++i) {
+            other_E_str += to_string_stream(other_E[i]);
+            if (i + 1 < other_E.size()) other_E_str += ", ";
         }
+        other_E_str += "]";
+
+        log("other_E = " + other_E_str);
+
+        log("verbose = " + to_string_stream(verbose ? "true" : "false"));
+        log("do_save = " + to_string_stream(do_save ? "true" : "false"));
+
+        log("file_prefix = " + file_prefix);
+
+        log("nb_point_res = " + to_string_stream(nb_point_res));
+
+        log("============== TCI params ==============");
+        log("  N = " + std::to_string(grid.nBits));
+        log("  d = 2");
+        log("  sweeps = " + std::to_string(tci_param.nb_iter));
+        log("========================================");
+
         MultiIndex pivot0 = grid.coord_to_id(E_init);
 
         TCI<Complex> tci(function_id, l_d, pivot0);
@@ -85,29 +138,35 @@ class TCI_Runner{
 
         for (int it = 0; it < tci_param.nb_iter; ++it) {
             tci.iterate();
-            if (verbose){
-                std::cout << "  sweep " << std::setw(3) << (it + 1)
-                    << "  |pivot error| = "
-                    << std::setprecision(6) << std::scientific
-                    << static_cast<double>(tci.last_pivot_error())
-                    << "\n";
-            }
+
+
+            std::ostringstream oss_pivot;
+
+            oss_pivot << std::scientific
+                    << std::setprecision(std::numeric_limits<Scalar>::max_digits10);
+
+            oss_pivot << "sweep " << (it + 1)
+                    << " |pivot error| = "
+                    << tci.last_pivot_error();
+
+            log(oss_pivot.str());
         }
         TensorTrain<Complex> tt_temp = tci.get_TensorTrain();
         std::vector<Cube<Complex>> cube_cores = tt_temp.convert_to_cubes();
 
         save_vec_cube(cube_cores, file_prefix + ".tt");
 
-        if (verbose){
-            std::cout << "Max bond dim:" <<tt_temp.max_bond_dimension() << "\n";
-        }
+        log("Max bond dim: " + std::to_string(tt_temp.max_bond_dimension()));
         
+        log("Nb function call:" + std::to_string(counter));
+
         TTErrorOnGrid<Scalar> error = 
             error_TT_on_grid_point(tt_temp, function_id, grid, nb_point_res);
         
-        if (verbose){
-            std::cout << error << "\n";
-        }
+        std::ostringstream oss;
+        oss << error;
+        log(oss.str());
+
         std::vector<Scalar> pivot_error = tci.pivotErrors();
 
         // save the tt and the grid
