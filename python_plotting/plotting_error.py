@@ -138,8 +138,8 @@ def plot_tt_comparison(data, filename: str=""):
     else:
         plt.show()
 
-a = load_dat("error.dat")
+"""a = load_dat("error.dat")
 
 plot_tt_comparison(a)
 
-print(a)
+print(a)"""
