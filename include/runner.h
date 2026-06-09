@@ -208,8 +208,8 @@ class TCI_Runner{
             if (E_min !=E_max){
                 // if not the case we skip the f_value file generation
                 // if E_min and E_max are given, they should be different
-                Complex f_a = function_x(E_min);
-                Complex f_b = function_x(E_max);
+                Complex f_a = function_x(grid.a);
+                Complex f_b = function_x(grid.b);
 
                 std::vector<Complex> l_f_discontinuity;
                 l_f_discontinuity.reserve(E_discontinuity.size());
