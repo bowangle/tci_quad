@@ -1,5 +1,10 @@
 #pragma once
 
+#include <complex>
+#include <string>
+#include <sstream>
+#include <iomanip>
+
 #include "grid.h"
 #include "tensortrain.h"
 #include "tensorcross.h"
@@ -35,7 +40,7 @@ class TCI_Runner{
     std::function<Complex(Scalar)> function_x;  // original function
     std::function<Complex(MultiIndex)> function_id; // function on grid
     const std::vector<int> l_d;
-    int counter = 0 ;
+    int counter = 0;
     std::shared_ptr<spdlog::logger> const logger;
 
     
@@ -82,13 +87,87 @@ class TCI_Runner{
         return oss.str();
     }
 
+    std::string to_string_for_save(const std::vector<Complex>& v)
+    {
+        std::ostringstream oss;
+        oss << "[";
+
+        for (size_t i = 0; i < v.size(); ++i)
+        {
+            oss << "\"(" << to_string(v[i]) << ")\"";
+            if (i + 1 < v.size())
+                oss << ", ";
+        }
+
+        oss << "]";
+        return oss.str();
+    }
+
+    std::string to_string(const Complex& z)
+    {
+        std::ostringstream oss;
+        oss << std::setprecision(std::numeric_limits<Scalar>::digits10 + 5) << std::scientific;
+        oss << z.real();
+        // always print sign explicitly for imaginary part
+        if (z.imag() >= 0)
+            oss << "+";
+        oss << z.imag() << "j";
+        return oss.str();
+    }
+
+    std::string to_string(const std::vector<Scalar>& v)
+    {
+        std::ostringstream oss;
+
+        oss << std::setprecision(std::numeric_limits<Scalar>::digits10 + 5) << std::scientific;
+
+        oss << "[";
+
+        for (size_t i = 0; i < v.size(); ++i)
+        {
+            oss << v[i];
+
+            if (i + 1 < v.size())
+                oss << ", ";
+        }
+
+        oss << "]";
+
+        return oss.str();
+    }
+
+    void save_to_json(
+        const std::string& filename,
+        const Complex& value,
+        const std::vector<Scalar>& l_discontinuity,
+        const std::vector<Complex>& l_f_discontinuity)
+    {
+        // this hard implement the json file, easier to do it that way here
+        std::ofstream file(filename);
+
+        file << "{\n";
+
+        file << "  \"value\": \"" << to_string(value) << "\",\n";
+
+        file << "  \"l_discontinuity\": "
+            << to_string(l_discontinuity) << ",\n";
+
+        file << "  \"l_f_discontinuity\": "
+            << to_string_for_save(l_f_discontinuity) << "\n";
+
+        file << "}\n";
+    }
+
     void fit(
         const Scalar E_init,
         const std::vector<Scalar> other_E,
         bool verbose = true,
         bool do_save=false,
         const std::string& file_prefix="",
-        int nb_point_res=1000
+        int nb_point_res=1000,
+        const std::vector<Scalar> E_discontinuity={},
+        const Scalar E_min=0,
+        const Scalar E_max=0
     ){
         auto log = [&](const std::string& msg) {
             if (logger) {
@@ -124,6 +203,36 @@ class TCI_Runner{
         log("  d = 2");
         log("  sweeps = " + std::to_string(tci_param.nb_iter));
         log("========================================");
+
+        if (!E_discontinuity.empty()){
+            if (E_min !=E_max){
+                // if not the case we skip the f_value file generation
+                // if E_min and E_max are given, they should be different
+                Complex f_a = function_x(E_min);
+                Complex f_b = function_x(E_max);
+
+                std::vector<Complex> l_f_discontinuity;
+                l_f_discontinuity.reserve(E_discontinuity.size());
+
+                for (const Scalar& e : E_discontinuity) {
+                    l_f_discontinuity.push_back(function_x(e));
+                }
+                
+                log("  f_a = " + to_string(f_a));
+                log("  f_b = " + to_string(f_b));
+                log("  E_discontinuity = " + to_string(E_discontinuity));
+                log("  l_f_discontinuity = " + to_string_for_save(l_f_discontinuity));
+                save_to_json(
+                    file_prefix + "_f_values.json",
+                    f_b,
+                    E_discontinuity,
+                    l_f_discontinuity
+                );
+            }
+        }
+
+
+        log("==========begin iteration===============");
 
         MultiIndex pivot0 = grid.coord_to_id(E_init);
 

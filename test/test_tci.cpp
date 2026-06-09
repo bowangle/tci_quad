@@ -43,7 +43,19 @@ void TCI_sin(int nBit, int n_iter, bool do_save=false, const std::string& filena
 
     std::vector<Scalar> v = {Scalar("2.05"), Scalar("2.3")};
 
-    tci_runner.fit(Scalar("2.05"), v, true, do_save, filename, nb_point_out);
+    std::vector<Scalar> E_discontinuity = {Scalar("2.0"), Scalar("2.1")};
+
+    tci_runner.fit(
+        Scalar("2.05"),
+        v,
+        true,
+        do_save,
+        filename,
+        nb_point_out,
+        E_discontinuity,
+        grid.a,
+        grid.b
+    );
 }
 
 int main() {
