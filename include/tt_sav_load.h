@@ -8,7 +8,7 @@
 template<class T>
 struct Cube {
     size_t n_rows, n_cols, n_slices;
-    std::vector<T> data; // size = r*c*s
+    std::vector<T> data; // in this format, we want the ordering [left, physical, right]
 
     T& operator()(size_t i, size_t j, size_t k) {
         return data[k*n_rows*n_cols + i*n_cols + j];
@@ -30,7 +30,7 @@ void save_arma_cube_vector(std::ostream& out,
 
     for (size_t t = 0; t < Xs.size(); ++t)
     {
-        out << "ARMA_CUB_VEC_TXT_FC016\n";
+        out << "ARMA_CUB_TXT_FC016\n";
 
         const auto& X = Xs[t];
 

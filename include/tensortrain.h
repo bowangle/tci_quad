@@ -117,41 +117,41 @@ public:
     }
 
     std::vector<Cube<Scalar>>
-    convert_to_cubes(){
+    convert_to_cubes() {
+        // TTCore = std::vector<Eigen::Matrix<Scalar, Eigen::Dynamic, Eigen::Dynamic>>;
+        // cores_ = std::vector<TTCore<Scalar>>;
+        // cores_ has ordering of legs [2(physical)][left; right]
+        // cube has ordering [left, physical, right]
+
         std::vector<Cube<Scalar>> result;
         result.reserve(cores_.size());
 
-        for (const auto& core : cores_) {
+        for (const TTCore<Scalar>& core : cores_) {
             if (core.empty())
                 throw std::invalid_argument("Empty TT core");
 
-            size_t r1 = core[0].rows();
-            size_t r2 = core[0].cols();
-            size_t n  = core.size();
+            size_t r1 = core[0].rows(); // left
+            size_t r2 = core[0].cols(); // right
+            size_t n  = core.size();    // physical
 
             Cube<Scalar> cube;
-            cube.n_rows = r1;
-            cube.n_cols = r2;
-            cube.n_slices = n;
-            cube.data.resize(r1 * r2 * n);
+            cube.n_rows = r1;   // left
+            cube.n_cols = n;    // physical
+            cube.n_slices = r2; // right
+            cube.data.resize(r1 * n * r2);
 
             for (size_t p = 0; p < n; ++p) {
                 const auto& M = core[p];
-
                 if (M.rows() != (int)r1 || M.cols() != (int)r2)
                     throw std::invalid_argument("Inconsistent matrix shape in TT core");
-
                 for (size_t i = 0; i < r1; ++i)
                     for (size_t j = 0; j < r2; ++j)
-                        cube(i, j, p) = M(i, j);
+                        cube(i, p, j) = M(i, j);  // [left, physical, right]
             }
-
             result.push_back(std::move(cube));
         }
-
         return result;
     }
-
 
 private:
     // return G^{(k)}[:,p,:]
@@ -163,7 +163,7 @@ private:
 
 private:
     Index N_;
-    std::vector<TTCore<Scalar>> cores_;
+    std::vector<TTCore<Scalar>> cores_; // ordering of legs is [physical][left; right]
 };
 
 #endif // TENSORTRAIN_H

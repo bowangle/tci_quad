@@ -54,6 +54,4 @@ int main() {
     int nb_point_out = 1000;
 
     TCI_sin<float128>(nBit, n_iter, do_save, file_prefix, nb_point_out);
-    
-    
 }
