@@ -9,3 +9,4 @@ extern/spdlog/
 *.json
 *.txt
 *.tt
+*.log

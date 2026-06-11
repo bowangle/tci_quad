@@ -31,6 +31,21 @@ struct MultiIndex {
     bool operator==(const MultiIndex& other) const noexcept {
         return data == other.data;
     }
+
+    bool operator<(const MultiIndex& other) const noexcept{
+        return data < other.data; // lexicographical compare
+    }
+
+};
+
+struct MultiIndexHash {
+    size_t operator()(const MultiIndex& mi) const noexcept {
+        size_t seed = mi.data.size();
+        for (int x : mi.data) {
+            seed ^= static_cast<size_t>(x) + 0x9e3779b9 + (seed << 6) + (seed >> 2);
+        }
+        return seed;
+    }
 };
 
 // -------- stream output --------

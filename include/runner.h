@@ -4,6 +4,9 @@
 #include <string>
 #include <sstream>
 #include <iomanip>
+#include <functional>
+#include <unordered_map>
+#include <memory>
 
 #include "grid.h"
 #include "tensortrain.h"
@@ -21,10 +24,12 @@ class TCI_param{
 
     int nBit;
     int nb_iter;
+    bool do_cache;
 
-    TCI_param(int nBit_, int nb_iter_)
+    TCI_param(int nBit_, int nb_iter_, bool do_cache_=false)
     :   nBit(nBit_),
-        nb_iter(nb_iter_)
+        nb_iter(nb_iter_),
+        do_cache(do_cache_)
     {}
 };
 
@@ -41,6 +46,7 @@ class TCI_Runner{
     std::function<Complex(MultiIndex)> function_id; // function on grid
     const std::vector<int> l_d;
     int counter = 0;
+    int counter_cached = 0;
     std::shared_ptr<spdlog::logger> const logger;
 
     
@@ -54,16 +60,17 @@ class TCI_Runner{
         grid(grid_),
         tci_param(tci_param_),
         function_x(function_x_),
-        function_id(func_to_grid(function_x_, grid_, logger_)),
+        function_id(resolve_function(tci_param.do_cache, function_x_, grid_, logger_)),
         l_d(std::vector<int>(grid_.nBits, 2)),
         logger(logger_),
-        counter(0)
+        counter(0),         // count the number of uncached call. (if no cache, then all the call)
+        counter_cached(0)   // count the total number of call (in absence of cached, it's 0)
     {}
 
     std::function<Complex(MultiIndex)>
     func_to_grid(
         std::function<Complex(Scalar)> f,
-        const QTGrid<Scalar, Sint>& qt_grid,
+        const QTGrid<Scalar, Sint>& qt_grid, // be carefull of lifetime. The output function can't outlive the TCI_runner class. A full copy would be totaly free.
         std::shared_ptr<spdlog::logger> logger_ = nullptr
     )
     {
@@ -79,6 +86,43 @@ class TCI_Runner{
                 };
         }
     }
+
+    std::function<Complex(MultiIndex)>
+    make_cached_function(std::function<Complex(MultiIndex)> f)
+    {
+        auto cache = std::make_shared<std::unordered_map<MultiIndex, Complex, MultiIndexHash>>();
+
+        return [this, f = std::move(f), cache](const MultiIndex& v) mutable -> Complex
+        {
+            this->counter_cached++;
+            auto it = cache->find(v);
+            if (it != cache->end())
+                return it->second;
+
+            Complex result = f(v);
+            cache->emplace(v, result);
+
+            return result;
+        };
+    }
+
+    std::function<Complex(MultiIndex)>
+    resolve_function(
+        bool do_cache,
+        std::function<Complex(Scalar)> function_x_,
+        const QTGrid<Scalar, Sint>& grid_, // be carefull of lifetime. The output function can't outlive the TCI_runner class. A full copy would be totaly free.
+        std::shared_ptr<spdlog::logger> logger_ = nullptr
+    ){
+        std::function<Complex(MultiIndex)> function_on_grid = func_to_grid(function_x_, grid_, logger_);
+        if (do_cache){
+            return make_cached_function(function_on_grid);
+        }
+        else{
+            return function_on_grid;
+        }
+    }
+
+
 
     template <typename T>
     std::string to_string_stream(const T& v) {
@@ -268,6 +312,7 @@ class TCI_Runner{
         log("Max bond dim: " + std::to_string(tt_temp.max_bond_dimension()));
         
         log("Nb function call:" + std::to_string(counter));
+        log("Nb function cached call:" + std::to_string(counter_cached));
 
         TTErrorOnGrid<Scalar> error = 
             error_TT_on_grid_point(tt_temp, function_id, grid, nb_point_res);

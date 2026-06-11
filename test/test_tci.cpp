@@ -22,7 +22,7 @@ std::function<std::complex<Scalar>(Scalar)> make_function_sin()
 
 
 template <typename Scalar>
-void TCI_sin(int nBit, int n_iter, bool do_save=false, const std::string& filename="", int nb_point_out=1000){
+void TCI_sin(int nBit, int n_iter, bool do_save=false, const std::string& filename="", int nb_point_out=1000, bool do_cache=false){
     using Complex = std::complex<Scalar>;
     bool is_lesser = true;
     int id_lead_1 = 0;
@@ -33,11 +33,15 @@ void TCI_sin(int nBit, int n_iter, bool do_save=false, const std::string& filena
     QTGrid<Scalar, long long> grid(a_1, b_1, nBit);
 
 
-    TCI_param tci_param = TCI_param(grid.nBits, n_iter);
+    TCI_param tci_param = TCI_param(grid.nBits, n_iter, do_cache);
 
     std::function<std::complex<Scalar>(Scalar)> f_sin = make_function_sin<Scalar>();
 
-    auto logger = spdlog::basic_logger_mt("test_file_logger", "test_logs.txt");
+    auto logger = spdlog::get("test_file_logger");
+    if (!logger)
+    {
+        logger = spdlog::basic_logger_mt("test_file_logger", "file.log");
+    }
 
     TCI_Runner<Scalar, long long> tci_runner(grid, tci_param, f_sin, logger);
 
@@ -65,5 +69,6 @@ int main() {
     std::string file_prefix = "test/test_out";
     int nb_point_out = 1000;
 
-    TCI_sin<float128>(nBit, n_iter, do_save, file_prefix, nb_point_out);
+    TCI_sin<float128>(nBit, n_iter, do_save, file_prefix, nb_point_out, false);
+    TCI_sin<float128>(nBit, n_iter, do_save, file_prefix, nb_point_out, true);
 }
