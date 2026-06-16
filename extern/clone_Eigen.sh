@@ -11,8 +11,8 @@ git clone https://gitlab.com/libeigen/eigen.git "$EIGEN_DIR"
 echo "==> Downloading nlohmann/json..."
 mkdir -p "$JSON_DIR/nlohmann"
 
-curl -L https://github.com/nlohmann/json/releases/download/v3.11.3/json.hpp \
-    -o "$JSON_DIR/nlohmann/json.hpp"
+wget -O "$JSON_DIR/nlohmann/json.hpp" \
+    https://github.com/nlohmann/json/releases/download/v3.11.3/json.hpp
 
 echo "==> Cloning spdlog..."
 if [ ! -d "$SPDLOG_DIR" ]; then
