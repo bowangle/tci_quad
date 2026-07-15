@@ -62,9 +62,9 @@ class TCI_Runner{
         function_x(function_x_),
         function_id(resolve_function(tci_param.do_cache, function_x_, grid_, logger_)),
         l_d(std::vector<int>(grid_.nBits, 2)),
-        logger(logger_),
         counter(0),         // count the number of uncached call. (if no cache, then all the call)
-        counter_cached(0)   // count the total number of call (in absence of cached, it's 0)
+        counter_cached(0),   // count the total number of call (in absence of cached, it's 0)
+        logger(logger_)
     {}
 
     std::function<Complex(MultiIndex)>
