@@ -134,7 +134,7 @@ public:
     Core get_TPm() const {
         const Mat& Lr = prrlu_->L();
         Index r = static_cast<Index>(Lr.rows());
-        Index n = static_cast<Index>(Lr.cols());
+        //Index n = static_cast<Index>(Lr.cols());
         if (r == 0) return {};
 
         Mat L = Lr.transpose();
