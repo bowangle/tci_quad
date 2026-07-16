@@ -2,7 +2,7 @@
 
 #include <boost/multiprecision/float128.hpp>
 #include "grid.h"
-#include "int128.h"
+#include "type_int128.h"
 #include "runner.h"
 
 using float128 = boost::multiprecision::float128;

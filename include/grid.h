@@ -11,7 +11,7 @@
 #include "mindex.h"
 using json = nlohmann::json;
 
-#include "int128.h"
+#include "type_int128.h"
 #include <boost/multiprecision/float128.hpp>
 
 using float128 = boost::multiprecision::float128;
@@ -127,8 +127,8 @@ private:
 
         if (j["a"].is_string())
         {
-            a = Scalar(j.at("a").get<std::string>());
-            b = Scalar(j.at("b").get<std::string>());
+            std::istringstream(j.at("a").get<std::string>()) >> a;
+            std::istringstream(j.at("b").get<std::string>()) >> b;
         }
         else
         {
