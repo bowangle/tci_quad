@@ -123,6 +123,7 @@ int main() {
     testgrid<float128, util::i128>();
     testgrid<double, long long>();
 
+    test_save_load_roundtrip<double, long long>();
     test_save_load_roundtrip<float128, util::i128>();
 
     test_grid_roundtrip();
