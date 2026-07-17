@@ -10,6 +10,8 @@
 #include "mindex.h"
 #include "tensortrain.h"
 
+#include <type_float128_boost.h>
+
 // Linespace
 template <typename Scalar>
 std::vector<Scalar> linspace(Scalar a, Scalar b, int N)

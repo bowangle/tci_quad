@@ -1,24 +1,23 @@
 #pragma once
 #include <cmath>
 #include <vector>
+#include <tuple>
+#include <limits>
 #include <stdexcept>
 #include <fstream>
 #include <sstream>
 #include <iomanip>
 #include <type_traits>
-
 #include <nlohmann/json.hpp>
-
-// for llround in coord_to_id
-#include <boost/multiprecision/float128.hpp>
-
 #include "mindex.h"
 
 struct dd_128;  // fwd decl for lossy JSON double conversion in save_json
 
 using json = nlohmann::json;
 
-// QTGrid support up to nBit=63. It might fail for 
+// QTGrid supports up to nBits = 126 (limited by Sint width: Sint(1) << nBits
+// must fit in a signed Sint). Scalar must carry enough mantissa bits for the
+// coordinate transform; see precision note in coord_to_id.
 template <typename Scalar, typename Sint>
 class QTGrid {
 public:
@@ -27,10 +26,8 @@ public:
 
     Scalar a;
     Scalar b;
-
     int nBits;
     Sint N;
-
     Scalar dx;
     Sint k_offset;
     Scalar x_ref;
@@ -39,10 +36,9 @@ public:
            Sint k_offset_ = 0)
         : a(a_), b(b_), nBits(nBits_), k_offset(k_offset_), x_ref(a_)
     {
-        if (nBits < 0 || nBits > 63) {
-            throw std::invalid_argument("nBits must be in [0, 63]");
+        if (nBits < 0 || nBits > 126) {
+            throw std::invalid_argument("nBits must be in [0, 126]");
         }
-
         N = Sint(1) << nBits;
         dx = (b_ - a_) / Scalar(N);
     }
@@ -54,19 +50,15 @@ public:
     }
 
     MultiIndex coord_to_id(Scalar x) const {
-        using boost::multiprecision::llround;
-        using std::llround;
-
-        Sint k = static_cast<Sint>(llround((x - a) * N/ (b-a)));
-
+        // Note: for large nBits this transform consumes nBits of Scalar's
+        // mantissa; with float128 (113-bit mantissa) and nBits = 100 only
+        // ~13 fractional bits remain, so points very close to cell
+        // boundaries may land in the neighboring cell.
+        Scalar t = (x - a) * Scalar(N) / (b - a);
+        Sint k = round_to_sint(t);
         if (k == N) k = N - 1;
-
-        if (!(k >= 0 && k <= N - 1))
-        {
-            std::cout << k << "\n" << N << "\n";
+        if (k < 0 || k > N - 1)
             throw std::out_of_range("k is outside [0, N-1]");
-        }
-            
         return _bits(k);
     }
 
@@ -74,7 +66,6 @@ public:
         Sint k = 0;
         for (int i = 0; i < nBits; ++i)
             k |= (Sint(bits.data[i]) << i);
-
         return _coords(k);
     }
 
@@ -92,15 +83,15 @@ public:
                 return static_cast<double>(v);
             }
         };
+
         j["a"] = to_double_lossy(a);
         j["b"] = to_double_lossy(b);
         suffix = "_grid.json";
         j["nBits"] = nBits;
-        
+
         std::ostringstream oss_a;
         oss_a << std::setprecision(std::numeric_limits<Scalar>::digits10 + 5) << a;
         j_2["a"] = oss_a.str();
-
         std::ostringstream oss_b;
         oss_b << std::setprecision(std::numeric_limits<Scalar>::digits10 + 5) << b;
         j_2["b"] = oss_b.str();
@@ -113,27 +104,38 @@ public:
         std::ofstream file_2(base + suffix_2);
         if (!file_2.is_open())
             throw std::runtime_error("Cannot open file_2");
-
         file << j.dump(4);
         file_2 << j_2.dump(4);
     }
 
 private:
+    static Sint round_to_sint(Scalar t) {
+        using std::floor;
+        using std::ceil;
+        Scalar r = (t < Scalar(0)) ? ceil(t - Scalar(0.5))
+                                   : floor(t + Scalar(0.5));
+        if constexpr (std::is_same_v<Scalar, dd_128>) {
+            // After a correct dd floor/ceil, hi and lo are both
+            // integer-valued doubles; sum them exactly in Sint.
+            // (lo may be negative — the addition handles that.)
+            return static_cast<Sint>(r._hi()) + static_cast<Sint>(r._lo());
+        } else if constexpr (std::is_arithmetic_v<Sint> ||
+                             std::is_same_v<Sint, __int128>) {
+            return static_cast<Sint>(r);
+        } else {
+            return r.template convert_to<Sint>();
+        }
+    }
 
     static std::tuple<Scalar, Scalar, int> parse_json(const std::string& filename)
     {
         json j;
-
         std::ifstream file(filename);
         if (!file.is_open())
             throw std::runtime_error("Cannot open file");
-
         file >> j;
-
         int nBits = j.at("nBits").get<int>();
-
         Scalar a, b;
-
         if (j["a"].is_string())
         {
             std::istringstream(j.at("a").get<std::string>()) >> a;
@@ -144,16 +146,13 @@ private:
             a = Scalar(j.at("a").get<double>());
             b = Scalar(j.at("b").get<double>());
         }
-
         return {a, b, nBits};
     }
 
     MultiIndex _bits(Sint k) const {
         MultiIndex bits(nBits);
-
         for (int i = 0; i < nBits; ++i)
             bits.data[i] = (k >> i) & 1;
-
         return bits;
     }
 

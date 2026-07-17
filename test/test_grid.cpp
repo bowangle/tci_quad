@@ -18,7 +18,7 @@ void test_one_grid_roudtrip(const char* name, const int nBit) {
 
     Scalar x = Scalar(1.25);
 
-    std::cout << "a="<< g.a <<"\n";
+    std::cout << std::scientific << std::setprecision(std::numeric_limits<Scalar>::max_digits10) << "a=" << g.a <<"\n";
     std::cout << "b="<< g.b <<"\n";
     std::cout << "N="<< g.N <<"\n";
     std::cout << "nBits="<< g.nBits <<"\n";
@@ -30,7 +30,8 @@ void test_one_grid_roudtrip(const char* name, const int nBit) {
     auto bits_2 = g.coord_to_id(x2);
     Scalar x3 = g.id_to_coord(bits_2);
 
-    std::cout << "x = " << x <<"; x2 = " << x2 << " -> x3 = " << x3 << "\n";
+    std::cout << std::scientific << std::setprecision(std::numeric_limits<Scalar>::max_digits10)
+        <<"x = " << x <<"; x2 = " << x2 << " -> x3 = " << x3 << "\n";
 
     if constexpr (std::is_same_v<Scalar, double>) {
         assert(std::abs(double(x2 - x3)) < 1e-6);
@@ -75,6 +76,9 @@ void test_grid_roundtrip(){
 
     test_one_grid_roudtrip<GridQ_QI>("GridQ_QI", 63);
     test_one_grid_roudtrip<GridDD_QI>("GridDD_QI", 63);
+
+    test_one_grid_roudtrip<GridQ_QI>("GridQ_QI", 100);
+    test_one_grid_roudtrip<GridDD_QI>("GridDD_QI", 100);
 }
 
 template <typename Scalar, typename Sint>
