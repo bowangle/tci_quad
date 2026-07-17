@@ -99,8 +99,6 @@ void run_demo(const std::string& label,
               << "  sweeps=" << n_iter << "\n";
     std::cout << "========================================\n";
 
-    using RealScalar = typename Eigen::NumTraits<Scalar>::Real;
-
     std::vector<int>  l_d(N, d);
     MultiIndex pivot0(std::vector<int>(N, 0));
     TCI<Scalar> tci(f_eval, l_d, pivot0);

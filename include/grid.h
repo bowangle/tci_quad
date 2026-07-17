@@ -8,13 +8,11 @@
 
 #include <nlohmann/json.hpp>
 
-#include "mindex.h"
-using json = nlohmann::json;
-
-#include "type_int128.h"
+// for llround in coord_to_id
 #include <boost/multiprecision/float128.hpp>
 
-using float128 = boost::multiprecision::float128;
+#include "mindex.h"
+using json = nlohmann::json;
 
 // QTGrid support up to nBit=63. It might fail for 
 template <typename Scalar, typename Sint>
@@ -152,7 +150,3 @@ private:
         return x_ref + Scalar(k - k_offset) * dx;
     }
 };
-
-using GridDouble = QTGrid<double, long long>;
-using GridQuadFast = QTGrid<float128, long long>;
-using GridQuad   = QTGrid<float128, util::i128>;

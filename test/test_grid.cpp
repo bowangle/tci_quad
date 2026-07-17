@@ -2,11 +2,11 @@
 #include <cmath>
 #include <iostream>
 #include <vector>
+#include "type_double_double.h"
 #include "grid.h"
 #include "type_int128.h"
-
-#include <boost/multiprecision/float128.hpp>
-using float128 = boost::multiprecision::float128;
+#include "type_float128_boost.h"
+#include "grid_alias.h"
 
 template <typename Grid>
 void test_one_grid_roudtrip(const char* name, const int nBit) {

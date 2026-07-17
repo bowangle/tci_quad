@@ -9,7 +9,6 @@
 #include "grid.h"
 #include "mindex.h"
 #include "tensortrain.h"
-#include <boost/multiprecision/float128.hpp>
 
 // Linespace
 template <typename Scalar>

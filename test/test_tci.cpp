@@ -4,8 +4,7 @@
 #include "runner.h"
 #include "grid.h"
 
-#include <boost/multiprecision/float128.hpp>
-using float128 = boost::multiprecision::float128;
+#include "type_float128_boost.h"
 
 #include <spdlog/sinks/basic_file_sink.h>
 #include <spdlog/spdlog.h>
@@ -23,11 +22,6 @@ std::function<std::complex<Scalar>(Scalar)> make_function_sin()
 
 template <typename Scalar>
 void TCI_sin(int nBit, int n_iter, bool do_save=false, const std::string& filename="", int nb_point_out=1000, bool do_cache=false){
-    using Complex = std::complex<Scalar>;
-    bool is_lesser = true;
-    int id_lead_1 = 0;
-    int id_lead_2 = 1;
-
     Scalar a_1 = Scalar("-5");
     Scalar b_1 = Scalar("10");
     QTGrid<Scalar, long long> grid(a_1, b_1, nBit);

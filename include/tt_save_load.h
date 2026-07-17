@@ -2,8 +2,7 @@
 
 #include <complex>
 #include <fstream>
-
-#include <boost/multiprecision/float128.hpp>
+#include <Eigen/Dense>
 
 template<class T>
 struct Cube {
@@ -19,12 +18,9 @@ struct Cube {
     }
 };
 
-using mpq = boost::multiprecision::float128;
-using cx  = std::complex<mpq>;
-
-
+template<typename cT>
 void save_arma_cube_vector(std::ostream& out,
-                            const std::vector<Cube<cx>>& Xs)
+                            const std::vector<Cube<cT>>& Xs)
 {
     out << Xs.size() << "\n";
 
@@ -39,7 +35,7 @@ void save_arma_cube_vector(std::ostream& out,
             << X.n_slices << "\n";
 
         out << std::scientific;
-        out << std::setprecision(std::numeric_limits<mpq>::digits10 + 5);
+        out << std::setprecision(std::numeric_limits<typename Eigen::NumTraits<cT>::Real>::digits10 + 5);
 
         for (size_t k = 0; k < X.n_slices; ++k)
         {
@@ -61,11 +57,11 @@ void save_arma_cube_vector(std::ostream& out,
     }
 }
 
-template<typename T>
-void save_vec_cube(std::vector<Cube<T>> cores, const std::string& filename)
+template<typename cT>
+void save_vec_cube(std::vector<Cube<cT>> cores, const std::string& filename)
 {
     std::ofstream file(filename);
     if (!file)
         throw std::runtime_error("Cannot open file");
-    save_arma_cube_vector(file, cores);
+    save_arma_cube_vector<cT>(file, cores);
 }
