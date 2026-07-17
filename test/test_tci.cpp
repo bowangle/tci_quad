@@ -4,7 +4,8 @@
 #include "runner.h"
 #include "grid.h"
 
-#include "type_float128_boost.h"
+#include <type_float128_boost.h>
+#include <type_double_double.h>
 
 #include <spdlog/sinks/basic_file_sink.h>
 #include <spdlog/spdlog.h>
@@ -65,4 +66,7 @@ int main() {
 
     TCI_sin<float128>(nBit, n_iter, do_save, file_prefix, nb_point_out, false);
     TCI_sin<float128>(nBit, n_iter, do_save, file_prefix, nb_point_out, true);
+
+    TCI_sin<dd_128>(nBit, n_iter, do_save, file_prefix, nb_point_out, false);
+    TCI_sin<dd_128>(nBit, n_iter, do_save, file_prefix, nb_point_out, true);
 }

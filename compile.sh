@@ -10,7 +10,7 @@ rm -rf "$BUILD_DIR"
 # Configure CMake (out-of-source build)
 cmake -S "$PROJECT_ROOT" -B "$BUILD_DIR" \
     -DCMAKE_BUILD_TYPE=Release \
-    -DCMAKE_CXX_FLAGS_RELEASE="-Ofast -march=native"\
+    -DCMAKE_CXX_FLAGS_RELEASE="-O3 -march=native"\
     #-DCMAKE_CXX_COMPILER=g++-13
 
 # Build everything

@@ -3,6 +3,11 @@
 #include <type_int128.h>
 #include "grid.h"
 
-using GridDouble = QTGrid<double, long long>;
-using GridQuadFast = QTGrid<float128, long long>;
-using GridQuad   = QTGrid<float128, util::i128>;
+using GridD_LL = QTGrid<double, long long>;
+using GridD_QI = QTGrid<double, util::i128>;
+
+using GridQ_LL = QTGrid<float128, long long>;
+using GridQ_QI   = QTGrid<float128, util::i128>;
+
+using GridDD_LL = QTGrid<dd_128, long long>;
+using GridDD_QI   = QTGrid<dd_128, util::i128>;

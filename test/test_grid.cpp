@@ -38,27 +38,43 @@ void test_one_grid_roudtrip(const char* name, const int nBit) {
 }
 
 void test_grid_roundtrip(){
-    test_one_grid_roudtrip<GridDouble>("double grid", 8);
-    test_one_grid_roudtrip<GridQuad>("float128 grid", 8);
-    test_one_grid_roudtrip<GridQuadFast>("float128 fast grid", 8);
+    test_one_grid_roudtrip<GridD_LL>("GridD_LL", 8);
+    test_one_grid_roudtrip<GridD_QI>("GridD_QI", 8);
+    test_one_grid_roudtrip<GridQ_LL>("GridQ_LL", 8);
+    test_one_grid_roudtrip<GridQ_QI>("GridQ_QI", 8);
+    test_one_grid_roudtrip<GridDD_LL>("GridDD_LL", 8);
+    test_one_grid_roudtrip<GridDD_QI>("GridDD_QI", 8);
 
-    test_one_grid_roudtrip<GridDouble>("double grid", 30);
-    test_one_grid_roudtrip<GridQuad>("float128 grid", 30);
-    test_one_grid_roudtrip<GridQuadFast>("float128 fast grid", 30);
+    test_one_grid_roudtrip<GridD_LL>("GridD_LL", 30);
+    test_one_grid_roudtrip<GridD_QI>("GridD_QI", 30);
+    test_one_grid_roudtrip<GridQ_LL>("GridQ_LL", 30);
+    test_one_grid_roudtrip<GridQ_QI>("GridQ_QI", 30);
+    test_one_grid_roudtrip<GridDD_LL>("GridDD_LL", 30);
+    test_one_grid_roudtrip<GridDD_QI>("GridDD_QI", 30);
 
-    test_one_grid_roudtrip<GridDouble>("double grid", 40);
-    test_one_grid_roudtrip<GridQuad>("float128 grid", 40);
-    test_one_grid_roudtrip<GridQuadFast>("float128 fast grid", 40);
+    test_one_grid_roudtrip<GridD_LL>("GridD_LL", 40);
+    test_one_grid_roudtrip<GridD_QI>("GridD_QI", 40);
+    test_one_grid_roudtrip<GridQ_LL>("GridQ_LL", 40);
+    test_one_grid_roudtrip<GridQ_QI>("GridQ_QI", 40);
+    test_one_grid_roudtrip<GridDD_LL>("GridDD_LL", 40);
+    test_one_grid_roudtrip<GridDD_QI>("GridDD_QI", 40);
 
-    test_one_grid_roudtrip<GridDouble>("double grid", 48);
-    test_one_grid_roudtrip<GridQuad>("float128 grid", 48);
-    test_one_grid_roudtrip<GridQuadFast>("float128 fast grid", 48);
+    test_one_grid_roudtrip<GridD_LL>("GridD_LL", 48);
+    test_one_grid_roudtrip<GridD_QI>("GridD_QI", 48);
+    test_one_grid_roudtrip<GridQ_LL>("GridQ_LL", 48);
+    test_one_grid_roudtrip<GridQ_QI>("GridQ_QI", 48);
+    test_one_grid_roudtrip<GridDD_LL>("GridDD_LL", 48);
+    test_one_grid_roudtrip<GridDD_QI>("GridDD_QI", 48);
 
-    test_one_grid_roudtrip<GridDouble>("double grid", 53);
-    test_one_grid_roudtrip<GridQuad>("float128 grid", 53);
-    test_one_grid_roudtrip<GridQuadFast>("float128 fast grid", 53);
+    test_one_grid_roudtrip<GridD_LL>("GridD_LL", 53);
+    test_one_grid_roudtrip<GridD_QI>("GridD_QI", 53);
+    test_one_grid_roudtrip<GridQ_LL>("GridQ_LL", 53);
+    test_one_grid_roudtrip<GridQ_QI>("GridQ_QI", 53);
+    test_one_grid_roudtrip<GridDD_LL>("GridDD_LL", 53);
+    test_one_grid_roudtrip<GridDD_QI>("GridDD_QI", 53);
 
-    test_one_grid_roudtrip<GridQuad>("float128 grid", 63);
+    test_one_grid_roudtrip<GridQ_QI>("GridQ_QI", 63);
+    test_one_grid_roudtrip<GridDD_QI>("GridDD_QI", 63);
 }
 
 template <typename Scalar, typename Sint>
@@ -120,11 +136,19 @@ void test_save_load_roundtrip()
 int main() {
     
     
-    testgrid<float128, util::i128>();
     testgrid<double, long long>();
+    testgrid<double, util::i128>();
+    testgrid<float128, long long>();
+    testgrid<float128, util::i128>();
+    testgrid<dd_128, long long>();
+    testgrid<dd_128, util::i128>();
 
     test_save_load_roundtrip<double, long long>();
+    test_save_load_roundtrip<double, util::i128>();
+    test_save_load_roundtrip<float128, long long>();
     test_save_load_roundtrip<float128, util::i128>();
+    test_save_load_roundtrip<dd_128, long long>();
+    test_save_load_roundtrip<dd_128, util::i128>();
 
     test_grid_roundtrip();
 }

@@ -5,6 +5,7 @@
 #include <fstream>
 #include <sstream>
 #include <iomanip>
+#include <type_traits>
 
 #include <nlohmann/json.hpp>
 
@@ -12,6 +13,9 @@
 #include <boost/multiprecision/float128.hpp>
 
 #include "mindex.h"
+
+struct dd_128;  // fwd decl for lossy JSON double conversion in save_json
+
 using json = nlohmann::json;
 
 // QTGrid support up to nBit=63. It might fail for 
@@ -81,8 +85,15 @@ public:
         std::string suffix;
         std::string suffix_2;
 
-        j["a"] = static_cast<double>(a);
-        j["b"] = static_cast<double>(b);
+        auto to_double_lossy = [](const Scalar& v) -> double {
+            if constexpr (std::is_same_v<Scalar, dd_128>) {
+                return v._hi();
+            } else {
+                return static_cast<double>(v);
+            }
+        };
+        j["a"] = to_double_lossy(a);
+        j["b"] = to_double_lossy(b);
         suffix = "_grid.json";
         j["nBits"] = nBits;
         
