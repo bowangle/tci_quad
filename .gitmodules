@@ -2,10 +2,6 @@
 	path = extern/numeric-type-quad
 	url = https://github.com/bowangle/numeric-type-quad.git
 	ignore = dirty
-[submodule "extern/eigen"]
-	path = extern/eigen
-	url = https://gitlab.com/libeigen/eigen.git
-	ignore = dirty
 [submodule "extern/nlohmann_json"]
 	path = extern/nlohmann_json
 	url = https://github.com/nlohmann/json.git
