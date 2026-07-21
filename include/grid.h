@@ -11,7 +11,21 @@
 #include <nlohmann/json.hpp>
 #include "mindex.h"
 
+#include "type_double_double.h"
+#include "type_float128_boost.h"
+
 struct dd_128;  // fwd decl for lossy JSON double conversion in save_json
+
+template<typename Real>
+Real pi() {
+    static_assert(sizeof(Real) == 0,
+        "pi() not specialised for this type — add a specialisation or include the right type header");
+    return Real(0);
+}
+
+template<> inline double     pi<double>()     { return M_PI; }
+template<> inline dd_128     pi<dd_128>()     { return dd_real::_pi; }
+template<> inline float128   pi<float128>()   { return boost::math::constants::pi<float128>(); }
 
 using json = nlohmann::json;
 
@@ -32,9 +46,18 @@ public:
     Sint k_offset;
     Scalar x_ref;
 
+    // Primary constructor: k_offset defaults to 0, x_ref defaults to a.
+    // The two-overload pattern avoids ambiguity while letting callers
+    // supply an explicit x_ref (matching XFAC_1d_qgrid's signature).
     QTGrid(Scalar a_, Scalar b_, int nBits_,
            Sint k_offset_ = 0)
-        : a(a_), b(b_), nBits(nBits_), k_offset(k_offset_), x_ref(a_)
+        : QTGrid(a_, b_, nBits_, k_offset_, a_)
+    {}
+
+    QTGrid(Scalar a_, Scalar b_, int nBits_,
+           Sint k_offset_,
+           Scalar x_ref_)
+        : a(a_), b(b_), nBits(nBits_), k_offset(k_offset_), x_ref(x_ref_)
     {
         if (nBits < 0 || nBits > 126) {
             throw std::invalid_argument("nBits must be in [0, 126]");
@@ -106,6 +129,40 @@ public:
             throw std::runtime_error("Cannot open file_2");
         file << j.dump(4);
         file_2 << j_2.dump(4);
+    }
+
+    Scalar delta_volume() const {
+        return dx;
+    }
+
+    void update_padding_1h_bit() {
+        // Increase range by 1 high bit: a and dx unchanged,
+        // b doubles the interval, nBits and N increase.
+        b = b + (b - a);
+        nBits = nBits + 1;
+        N = Sint(1) << nBits;
+    }
+
+    void update_padding_1l_bit() {
+        // Increase resolution by 1 low bit: a and b unchanged,
+        // dx halves, nBits and N increase.
+        nBits = nBits + 1;
+        N = Sint(1) << nBits;
+        dx = (b - a) / Scalar(N);
+    }
+
+    QTGrid build_dual_grid(bool centered = true) const {
+        Scalar L = b - a;
+        // df = 2*pi / L  (8*atan(1) == 2*pi, portable for any Scalar)
+        Scalar df = Scalar(2) * pi() / L;
+        Scalar Lf = Scalar(N) * df;
+        if (centered) {
+            return QTGrid(-Lf / Scalar(2), Lf / Scalar(2), nBits,
+                          N / Sint(2), Scalar(0));
+        } else {
+            return QTGrid(Scalar(0), Lf, nBits,
+                          Sint(0), Scalar(0));
+        }
     }
 
 private:
