@@ -61,7 +61,7 @@ class TCI_Runner{
         tci_param(tci_param_),
         function_x(function_x_),
         function_id(resolve_function(tci_param.do_cache, function_x_, grid_, logger_)),
-        l_d(std::vector<int>(grid_.nBits, 2)),
+        l_d(std::vector<int>(grid_.get_nBits(), 2)),
         counter(0),         // count the number of uncached call. (if no cache, then all the call)
         counter_cached(0),   // count the total number of call (in absence of cached, it's 0)
         logger(logger_)
@@ -243,7 +243,7 @@ class TCI_Runner{
         log("nb_point_res = " + to_string_stream(nb_point_res));
 
         log("============== TCI params ==============");
-        log("  N = " + std::to_string(grid.nBits));
+        log("  N = " + std::to_string(grid.get_nBits()));
         log("  d = 2");
         log("  sweeps = " + std::to_string(tci_param.nb_iter));
         log("========================================");
@@ -252,8 +252,8 @@ class TCI_Runner{
             if (E_min !=E_max){
                 // if not the case we skip the f_value file generation
                 // if E_min and E_max are given, they should be different
-                Complex f_a = function_x(grid.a);
-                Complex f_b = function_x(grid.b);
+                Complex f_a = function_x(grid.get_a());
+                Complex f_b = function_x(grid.get_b());
 
                 std::vector<Complex> l_f_discontinuity;
                 l_f_discontinuity.reserve(E_discontinuity.size());

@@ -175,11 +175,11 @@ std::ostream& operator<<(std::ostream& os, const TTErrorOnGrid<Scalar>& e)
 }
 
 // Error calculation:
-template <typename Scalar>
+template <typename Scalar, typename Sint>
 TTErrorOnGrid<Scalar> error_TT_on_grid_point(
     const TensorTrain<std::complex<Scalar>>& tt,
     std::function<std::complex<Scalar>(MultiIndex)> gf_id,
-    const QTGrid<Scalar, long long>& grid,
+    const QTGrid<Scalar, Sint>& grid,
     int nb_point)
 {
     using Complex = std::complex<Scalar>;
@@ -192,7 +192,7 @@ TTErrorOnGrid<Scalar> error_TT_on_grid_point(
     out.abs_abs.resize(nb_point);
     out.abs_rel.resize(nb_point);
 
-    std::vector<Scalar> l_point = linspace(grid.a, grid.b, nb_point);
+    std::vector<Scalar> l_point = linspace(grid.get_a(), grid.get_b(), nb_point);
     std::vector<Complex> l_ref_i(nb_point);
     std::vector<Complex> l_res_tt(nb_point);
 

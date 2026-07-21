@@ -18,10 +18,10 @@ void test_one_grid_roudtrip(const char* name, const int nBit) {
 
     Scalar x = Scalar(1.25);
 
-    std::cout << std::scientific << std::setprecision(std::numeric_limits<Scalar>::max_digits10) << "a=" << g.a <<"\n";
-    std::cout << "b="<< g.b <<"\n";
-    std::cout << "N="<< g.N <<"\n";
-    std::cout << "nBits="<< g.nBits <<"\n";
+    std::cout << std::scientific << std::setprecision(std::numeric_limits<Scalar>::max_digits10) << "a=" << g.get_a() <<"\n";
+    std::cout << "b="<< g.get_b() <<"\n";
+    std::cout << "N="<< g.get_N() <<"\n";
+    std::cout << "nBits="<< g.get_nBits() <<"\n";
 
     auto bits = g.coord_to_id(x);
     Scalar x2 = g.id_to_coord(bits);
@@ -114,23 +114,23 @@ void test_save_load_roundtrip()
         return abs(x - y) < Scalar(1e-12);
     };
 
-    std::cout << "a: " << grid.a << " vs " << grid2.a << "\n";
-    std::cout << "b: " << grid.b << " vs " << grid2.b << "\n";
-    std::cout << "nBits: " << grid.nBits << " vs " << grid2.nBits << "\n";
-    std::cout << "k_offset: " << grid.k_offset << " vs " << grid2.k_offset << "\n";
-    std::cout << "x_ref: " << grid.x_ref << " vs " << grid2.x_ref << "\n";
+    std::cout << "a: " << grid.get_a() << " vs " << grid2.get_a() << "\n";
+    std::cout << "b: " << grid.get_b() << " vs " << grid2.get_b() << "\n";
+    std::cout << "nBits: " << grid.get_nBits() << " vs " << grid2.get_nBits() << "\n";
+    std::cout << "k_offset: " << grid.get_k_offset() << " vs " << grid2.get_k_offset() << "\n";
+    std::cout << "x_ref: " << grid.get_x_ref() << " vs " << grid2.get_x_ref() << "\n";
 
-    assert(almost_equal(grid.a, grid2.a));
-    assert(almost_equal(grid.b, grid2.b));
-    assert(grid.nBits == grid2.nBits);
-    assert(grid.k_offset == grid2.k_offset);
-    assert(almost_equal(grid.x_ref, grid2.x_ref));
+    assert(almost_equal(grid.get_a(), grid2.get_a()));
+    assert(almost_equal(grid.get_b(), grid2.get_b()));
+    assert(grid.get_nBits() == grid2.get_nBits());
+    assert(grid.get_k_offset() == grid2.get_k_offset());
+    assert(almost_equal(grid.get_x_ref(), grid2.get_x_ref()));
 
     // derived consistency
-    assert(grid2.N == (Sint(1) << grid2.nBits));
+    assert(grid2.get_N() == (Sint(1) << grid2.get_nBits()));
 
-    Scalar dx1 = (grid.b - grid.a) / Scalar(grid.N);
-    Scalar dx2 = (grid2.b - grid2.a) / Scalar(grid2.N);
+    Scalar dx1 = (grid.get_b() - grid.get_a()) / Scalar(grid.get_N());
+    Scalar dx2 = (grid2.get_b() - grid2.get_a()) / Scalar(grid2.get_N());
 
     assert(almost_equal(dx1, dx2));
 

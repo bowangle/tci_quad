@@ -38,6 +38,7 @@ public:
     using scalar_type = Scalar;
     using index_type = Sint;
 
+private:
     Scalar a;
     Scalar b;
     int nBits;
@@ -45,6 +46,16 @@ public:
     Scalar dx;
     Sint k_offset;
     Scalar x_ref;
+
+public:
+    // --- read-only accessors ---
+    const Scalar& get_a()        const { return a; }
+    const Scalar& get_b()        const { return b; }
+    int           get_nBits()    const { return nBits; }
+    Sint          get_N()        const { return N; }
+    const Scalar& get_dx()       const { return dx; }
+    Sint          get_k_offset() const { return k_offset; }
+    Scalar        get_x_ref()    const { return x_ref; }
 
     // Primary constructor: k_offset defaults to 0, x_ref defaults to a.
     // The two-overload pattern avoids ambiguity while letting callers
@@ -138,6 +149,8 @@ public:
     void update_padding_1h_bit() {
         // Increase range by 1 high bit: a and dx unchanged,
         // b doubles the interval, nBits and N increase.
+        if (nBits + 1 > 126)
+            throw std::overflow_error("update_padding_1h_bit: nBits would exceed 126");
         b = b + (b - a);
         nBits = nBits + 1;
         N = Sint(1) << nBits;
@@ -146,6 +159,8 @@ public:
     void update_padding_1l_bit() {
         // Increase resolution by 1 low bit: a and b unchanged,
         // dx halves, nBits and N increase.
+        if (nBits + 1 > 126)
+            throw std::overflow_error("update_padding_1l_bit: nBits would exceed 126");
         nBits = nBits + 1;
         N = Sint(1) << nBits;
         dx = (b - a) / Scalar(N);
@@ -153,7 +168,7 @@ public:
 
     QTGrid build_dual_grid(bool centered = true) const {
         Scalar L = b - a;
-        // df = 2*pi / L  (8*atan(1) == 2*pi, portable for any Scalar)
+        // df = 2*pi / L
         Scalar df = Scalar(2) * pi<Scalar>() / L;
         Scalar Lf = Scalar(N) * df;
         if (centered) {
@@ -166,6 +181,7 @@ public:
     }
 
 private:
+
     static Sint round_to_sint(Scalar t) {
         using std::floor;
         using std::ceil;

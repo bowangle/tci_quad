@@ -28,7 +28,7 @@ void TCI_sin(int nBit, int n_iter, bool do_save=false, const std::string& filena
     QTGrid<Scalar, long long> grid(a_1, b_1, nBit);
 
 
-    TCI_param tci_param = TCI_param(grid.nBits, n_iter, do_cache);
+    TCI_param tci_param = TCI_param(grid.get_nBits(), n_iter, do_cache);
 
     std::function<std::complex<Scalar>(Scalar)> f_sin = make_function_sin<Scalar>();
 
@@ -52,8 +52,8 @@ void TCI_sin(int nBit, int n_iter, bool do_save=false, const std::string& filena
         filename,
         nb_point_out,
         E_discontinuity,
-        grid.a,
-        grid.b
+        grid.get_a(),
+        grid.get_b()
     );
 }
 
