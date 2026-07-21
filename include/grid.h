@@ -154,7 +154,7 @@ public:
     QTGrid build_dual_grid(bool centered = true) const {
         Scalar L = b - a;
         // df = 2*pi / L  (8*atan(1) == 2*pi, portable for any Scalar)
-        Scalar df = Scalar(2) * pi() / L;
+        Scalar df = Scalar(2) * pi<Scalar>() / L;
         Scalar Lf = Scalar(N) * df;
         if (centered) {
             return QTGrid(-Lf / Scalar(2), Lf / Scalar(2), nBits,
