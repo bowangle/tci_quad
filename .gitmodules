@@ -10,3 +10,6 @@
 	path = extern/spdlog
 	url = https://github.com/gabime/spdlog.git
 	ignore = dirty
+[submodule "extern/QTgrid-quad"]
+	path = extern/QTgrid-quad
+	url = https://github.com/bowangle/QTgrid-quad.git
