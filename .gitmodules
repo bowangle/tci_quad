@@ -13,3 +13,4 @@
 [submodule "extern/QTgrid-quad"]
 	path = extern/QTgrid-quad
 	url = https://github.com/bowangle/QTgrid-quad.git
+	ignore = dirty
