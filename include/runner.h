@@ -77,12 +77,12 @@ class TCI_Runner{
         if (logger_){
                 return [this, &qt_grid, f](const MultiIndex& id) -> Complex {
                     counter++;
-                    return f(qt_grid.id_to_coord(id));
+                    return f(qt_grid.id_to_coord(id.data));
                 };
             }
         else{
             return [&qt_grid, f](const MultiIndex& id) -> Complex {
-                    return f(qt_grid.id_to_coord(id));
+                    return f(qt_grid.id_to_coord(id.data));
                 };
         }
     }

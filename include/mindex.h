@@ -17,7 +17,7 @@ struct MultiIndex {
     explicit MultiIndex(size_t nBits)
         : data(nBits, 0) {}
 
-    explicit MultiIndex(std::vector<int> v) : data(std::move(v)) {}
+    /*implicit*/ MultiIndex(std::vector<int> v) : data(std::move(v)) {}
     MultiIndex(std::initializer_list<int> v) : data(v) {}
 
     MultiIndex operator+(const MultiIndex& other) const {
